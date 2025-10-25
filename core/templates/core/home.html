@@ -5,67 +5,71 @@
 
 {% block content %}
     <!-- 上方統計卡片 -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-2">課程</p>
-                            <h3 class="stat-number mb-0">12</h3>
-                        </div>
-                        <i class="bi bi-book stat-icon"></i>
-                    </div>
-                    <a href="/courses/" class="btn btn-sm btn-primary mt-3 w-100">進入課程</a>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-2">考卷</p>
-                            <h3 class="stat-number mb-0">28</h3>
-                        </div>
-                        <i class="bi bi-pencil-square stat-icon"></i>
-                    </div>
-                    <a href="/assessments/" class="btn btn-sm btn-primary mt-3 w-100">寫考卷</a>
-                </div>
-            </div>
-        </div>
+    {% if user.is_authenticated %}
 
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-2">報名</p>
-                            <h3 class="stat-number mb-0">5</h3>
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="stat-label mb-2">課程</p>
+                                <h3 class="stat-number mb-0">12</h3>
+                            </div>
+                            <i class="bi bi-book stat-icon"></i>
                         </div>
-                        <i class="bi bi-file-earmark-text stat-icon"></i>
+                        <a href="{% url 'course_list' %}" class="btn btn-sm btn-primary mt-3 w-100">進入課程</a>
                     </div>
-                    <a href="/enrollments/" class="btn btn-sm btn-primary mt-3 w-100">查看報名</a>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="stat-label mb-2">使用者</p>
-                            <h3 class="stat-number mb-0">42</h3>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="stat-label mb-2">考卷</p>
+                                <h3 class="stat-number mb-0">28</h3>
+                            </div>
+                            <i class="bi bi-pencil-square stat-icon"></i>
                         </div>
-                        <i class="bi bi-people stat-icon"></i>
+                        <a href="/assessments/" class="btn btn-sm btn-primary mt-3 w-100">寫考卷</a>
                     </div>
-                    <a href="/users/" class="btn btn-sm btn-primary mt-3 w-100">管理使用者</a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="stat-label mb-2">報名</p>
+                                <h3 class="stat-number mb-0">5</h3>
+                            </div>
+                            <i class="bi bi-file-earmark-text stat-icon"></i>
+                        </div>
+                        <a href="/enrollments/" class="btn btn-sm btn-primary mt-3 w-100">查看報名</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="stat-label mb-2">使用者</p>
+                                <h3 class="stat-number mb-0">42</h3>
+                            </div>
+                            <i class="bi bi-people stat-icon"></i>
+                        </div>
+                        <a href="/users/" class="btn btn-sm btn-primary mt-3 w-100">管理使用者</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 
     <!-- 中間內容區域 -->
     <div class="row mb-4">
@@ -75,7 +79,6 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="bi bi-clock-history"></i> 最近活動</h5>
-                        <small class="text-muted">最新的平台活動</small>
                     </div>
                 </div>
                 <div class="card-body">

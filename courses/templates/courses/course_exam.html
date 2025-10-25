@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block title %}課程測驗 - {{ course.title }} - CramSchool{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-clipboard-check text-success"></i> 課程測驗
+{% endblock %}
+
+{% block page_subtitle %}{{ course.title }} - {{ course.grade }}{% endblock %}
+
+{% block content %}
+    <div class="exam-container">
+        <!-- 考試資訊卡片 -->
+        <div class="card mb-4 border-success">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> 測驗資訊
+                    </h5>
+                    <span class="badge bg-light text-success">
+                    共 {{ total_questions }} 題
+                </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-journal-text text-success fs-4 me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">科目</small>
+                                <strong>{{ course.subject.name }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-list-ol text-success fs-4 me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">題數</small>
+                                <strong>{{ total_questions }} 題</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock text-success fs-4 me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">計時</small>
+                                <strong id="timer">00:00</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 考試表單 -->
+        <form method="post" action="{% url 'course_exam_submit' course.pk %}" id="examForm">
+            {% csrf_token %}
+
+            <!-- 題目列表 -->
+            {% for question in questions %}
+                <div class="card mb-4 question-card" data-question="{{ forloop.counter }}">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="mb-0">
+                                <span class="badge bg-primary me-2">{{ question.exam_number }}</span>
+                                <span class="badge bg-secondary">
+                            {{ question.get_difficulty_display }}
+                        </span>
+                            </h5>
+                            <span class="badge bg-info">{{ question.question_type.name }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 題目內容 -->
+                        <div class="question-content mb-4">
+                            <p class="fs-5 mb-0" style="white-space: pre-line;">{{ question.content }}</p>
+                        </div>
+
+                        <!-- 選項 -->
+                        <div class="choices-container">
+                            {% for choice in question.choices.all %}
+                                <div class="form-check choice-item">
+                                    <input
+                                            class="form-check-input"
+                                            type="radio"
+                                            name="question_{{ question.id }}"
+                                            id="choice_{{ choice.id }}"
+                                            value="{{ choice.id }}"
+                                            required>
+                                    <label class="form-check-label w-100" for="choice_{{ choice.id }}">
+                                        <div class="choice-content">
+                                            <span class="choice-letter">{{ choice.order|add:64|stringformat:"c" }}</span>
+                                            <span class="choice-text">{{ choice.content }}</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- 提交區域 -->
+            <div class="card border-success">
+                <div class="card-body text-center py-4">
+                    <h5 class="mb-3">
+                        <i class="bi bi-check-circle text-success"></i> 確認要提交考卷嗎？
+                    </h5>
+                    <p class="text-muted mb-4">
+                        請確認所有題目都已作答，提交後將無法修改答案。
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                            <i class="bi bi-send-fill"></i> 提交考卷
+                        </button>
+                        <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-circle"></i> 取消測驗
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* 考試容器 */
+        .exam-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 題目卡片 */
+        .question-card {
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-content {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* 選項樣式 */
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .choice-item {
+            margin-bottom: 0;
+            padding: 0;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0.25rem;
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-check-label:hover {
+            background: #f3f4f6;
+            border-color: #3b82f6;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .choice-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .choice-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .form-check-input:checked + .form-check-label .choice-letter {
+            background: #1e40af;
+        }
+
+        .choice-text {
+            flex: 1;
+            line-height: 2;
+        }
+
+        /* 計時器 */
+        #timer {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #059669;
+        }
+
+        /* 提交按鈕 */
+        .btn-lg {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        }
+
+        /* 警告提示 */
+        .alert-warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .choice-content {
+                gap: 0.5rem;
+            }
+
+            .choice-letter {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+
+            .form-check-label {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // 計時器
+        let startTime = Date.now();
+        const timerElement = document.getElementById('timer');
+
+        function updateTimer() {
+            const elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        setInterval(updateTimer, 1000);
+
+        // 表單提交確認
+        const examForm = document.getElementById('examForm');
+        const submitBtn = document.getElementById('submitBtn');
+        let isSubmitting = false;
+
+        // 防止離開頁面的處理函數
+        function preventLeave(e) {
+            if (!isSubmitting) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        }
+
+        // 添加離開警告
+        window.addEventListener('beforeunload', preventLeave);
+
+        examForm.addEventListener('submit', function(e) {
+            // 檢查是否所有題目都已作答
+            const totalQuestions = {{ total_questions }};
+            let answeredCount = 0;
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionInputs = document.querySelectorAll(`input[name^="question_"]:checked`);
+                answeredCount = questionInputs.length;
+            }
+
+            if (answeredCount < totalQuestions) {
+                e.preventDefault();
+                const unanswered = totalQuestions - answeredCount;
+                if (!confirm(`還有 ${unanswered} 題未作答，確定要提交嗎？`)) {
+                    return;
+                }
+            } else {
+                if (!confirm('確定要提交考卷嗎？提交後將無法修改答案。')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // 設置提交標記，移除離開警告
+            isSubmitting = true;
+            window.removeEventListener('beforeunload', preventLeave);
+
+            // 禁用提交按鈕防止重複提交
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> 提交中...';
+        });
+
+        // 標記已作答的題目
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const questionCard = this.closest('.question-card');
+                questionCard.style.borderLeftColor = '#10b981';
+            });
+        });
+    </script>
+{% endblock %}

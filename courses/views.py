@@ -2,10 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 
 from .models import Course, Subject, Grade
 from .forms import CourseForm
+from assessments.models import Question, Choice
+
+import random
 
 
 def course_list(request):
@@ -158,3 +161,108 @@ def get_teachers():
     if hasattr(User, 'role'):
         return User.objects.filter(role__in=['teacher', 'admin']).order_by('username')
     return User.objects.all().order_by('username')
+
+@login_required(login_url='login')
+def course_qa_chat(request, pk):
+    """課程 AI 問答聊天"""
+    course = get_object_or_404(Course, pk=pk, is_active=True)
+
+    context = {
+        'course': course,
+    }
+
+    return render(request, 'courses/course_qa_chat.html', context)
+
+@login_required(login_url='login')
+def course_exam(request, pk):
+    """課程考試"""
+    course = get_object_or_404(Course, pk=pk, is_active=True)
+
+    # 從資料庫中獲取該課程的所有題目（包含選項）
+    questions = Question.objects.filter(
+        course=course
+    ).prefetch_related(
+        Prefetch('choices', queryset=Choice.objects.order_by('order'))
+    ).order_by('?')  # 隨機排序
+
+    # 可以在這裡調整題數
+    exam_questions = list(questions[:1])  # 取前 5 題
+
+    # # 如果題目不足 5 題
+    # if len(exam_questions) < 5:
+    #     messages.warning(request, f'此課程目前只有 {len(exam_questions)} 題，無法進行完整測驗。')
+    #
+    # if not exam_questions:
+    #     messages.error(request, '此課程尚未建立題目，無法進行測驗。')
+    #     return redirect('course_detail', pk=pk)
+
+    # 為每個題目編號
+    for idx, question in enumerate(exam_questions, 1):
+        question.exam_number = idx
+
+    context = {
+        'course': course,
+        'questions': exam_questions,
+        'total_questions': len(exam_questions),
+    }
+
+    return render(request, 'courses/course_exam.html', context)
+
+
+@login_required(login_url='login')
+def course_exam_submit(request, pk):
+    """提交考試答案"""
+    if request.method != 'POST':
+        return redirect('course_exam', pk=pk)
+
+    course = get_object_or_404(Course, pk=pk, is_active=True)
+
+    # 獲取提交的答案
+    submitted_answers = {}
+    for key, value in request.POST.items():
+        if key.startswith('question_'):
+            question_id = int(key.replace('question_', ''))
+            choice_id = int(value)
+            submitted_answers[question_id] = choice_id
+
+    # 獲取題目和正確答案
+    question_ids = list(submitted_answers.keys())
+    questions = Question.objects.filter(
+        id__in=question_ids,
+        course=course
+    ).prefetch_related('choices')
+
+    # 計算成績
+    results = []
+    correct_count = 0
+    total_questions = len(questions)
+
+    for idx, question in enumerate(questions, 1):
+        question.exam_number = idx
+        user_choice_id = submitted_answers.get(question.id)
+        user_choice = question.choices.filter(id=user_choice_id).first() if user_choice_id else None
+        correct_choice = question.choices.filter(is_correct=True).first()
+
+        is_correct = user_choice and user_choice.is_correct
+        if is_correct:
+            correct_count += 1
+
+        results.append({
+            'question': question,
+            'user_choice': user_choice,
+            'correct_choice': correct_choice,
+            'is_correct': is_correct,
+        })
+
+    # 計算分數
+    score = round((correct_count / total_questions * 100), 2) if total_questions > 0 else 0
+
+    context = {
+        'course': course,
+        'results': results,
+        'correct_count': correct_count,
+        'total_questions': total_questions,
+        'score': score,
+    }
+
+    return render(request, 'courses/course_exam_result.html', context)

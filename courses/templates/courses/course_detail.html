@@ -367,15 +367,13 @@
         // 開始問答
         function startQA() {
             // TODO: 實作開始問答功能
-            alert('開始問答功能開發中...');
-            // window.location.href = '/courses/{{ course.pk }}/qa/';
+            window.location.href = '{% url "course_qa_chat" course.pk %}';
         }
 
         // 開始考試
         function startExam() {
             // TODO: 實作開始考試功能
-            alert('開始考試功能開發中...');
-            // window.location.href = '/courses/{{ course.pk }}/exam/';
+            window.location.href = '{% url "course_exam" course.pk %}';
         }
     </script>
 {% endblock %}

@@ -1,0 +1,618 @@
+{% extends 'base.html' %}
+
+{% block title %}AI 問答 - {{ course.title }} - CramSchool{% endblock %}
+
+{% block page_header %}
+    <!-- 自定義頁面標題 -->
+    <div class="page-header mb-0 pb-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title mb-2">
+                    <i class="bi bi-chat-dots text-info"></i> AI 問答助手
+                </h1>
+                <p class="page-subtitle mb-0">{{ course.title }} - {{ course.grade }}</p>
+            </div>
+            <div>
+                <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i> 結束問答
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="chat-container-wrapper">
+        <div class="row g-3">
+            <!-- 左側：聊天視窗 -->
+            <div class="col-lg-9">
+                <div class="card chat-card shadow-lg">
+                    <!-- 聊天訊息區域 -->
+                    <div class="card-body chat-messages" id="chatMessages">
+                        <!-- 歡迎訊息 -->
+                        <div class="message-wrapper ai-message">
+                            <div class="message-avatar">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-sender">AI 助教</span>
+                                    <span class="message-time">剛剛</span>
+                                </div>
+                                <div class="message-bubble ai">
+                                    <p class="mb-2">👋 你好！我是你的 AI 學習助教。</p>
+                                    <p class="mb-0">我可以幫你解答關於「{{ course.title }}」的任何問題。請隨時向我提問！</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 輸入區域 -->
+                    <div class="card-footer chat-input-area">
+                        <form id="chatForm" class="d-flex gap-2 align-items-end">
+                            <div class="flex-grow-1">
+                            <textarea
+                                    class="form-control chat-input"
+                                    id="messageInput"
+                                    rows="1"
+                                    placeholder="輸入你的問題... (Enter 發送，Shift+Enter 換行)"
+                                    required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-send" id="sendButton">
+                                <i class="bi bi-send-fill"></i>
+                                <span class="ms-2 d-none d-sm-inline">發送</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：快速操作 -->
+            <div class="col-lg-3">
+                <!-- 範例題目 -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-question-circle"></i> 範例題目
+                        </h6>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個基礎題目來練習">
+                                <i class="bi bi-1-circle"></i> 基礎題目
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個進階題目來挑戰">
+                                <i class="bi bi-2-circle"></i> 進階題目
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個應用題來練習">
+                                <i class="bi bi-3-circle"></i> 應用題目
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個綜合題目">
+                                <i class="bi bi-star"></i> 綜合題目
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 理解程度回饋 -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-emoji-smile"></i> 理解程度
+                        </h6>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-sm btn-outline-success feedback-btn" data-feedback="完全理解" data-level="understand">
+                                <i class="bi bi-emoji-laughing"></i> 完全理解
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning feedback-btn" data-feedback="大致理解" data-level="mostly">
+                                <i class="bi bi-emoji-smile"></i> 大致理解
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning feedback-btn" data-feedback="不太理解" data-level="partial">
+                                <i class="bi bi-emoji-neutral"></i> 不太理解
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger feedback-btn" data-feedback="無法理解" data-level="confused">
+                                <i class="bi bi-emoji-frown"></i> 無法理解
+                            </button>
+                        </div>
+                        <hr class="my-2">
+                        <small class="text-muted d-block text-center">
+                            <i class="bi bi-info-circle"></i> 點擊回饋你的理解程度
+                        </small>
+                    </div>
+                </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* 聊天容器 */
+        .chat-container-wrapper {
+            padding: 0;
+        }
+
+        .chat-card {
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        /* 聊天訊息區域 - 固定高度並可滾動 */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 2rem;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-height: 0; /* 重要：確保可以滾動 */
+        }
+
+        /* 訊息包裝器 */
+        .message-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-wrapper.user-message {
+            flex-direction: row-reverse;
+        }
+
+        /* 訊息頭像 */
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .ai-message .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+        }
+
+        /* 訊息內容 */
+        .message-content {
+            flex: 1;
+            max-width: 75%;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .message-time {
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+
+        /* 訊息氣泡 */
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            white-space: pre-line;
+        }
+
+        .message-bubble.ai {
+            background: white;
+            border: 1px solid #e5e7eb;
+        }
+
+        .message-bubble.user {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .user-message .message-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        /* 輸入區域 */
+        .chat-input-area {
+            background: white;
+            border-top: 2px solid #e5e7eb;
+            padding: 1.5rem;
+        }
+
+        .chat-input {
+            resize: none;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-send {
+            border-radius: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 快速操作按鈕 */
+        .quick-question-btn,
+        .feedback-btn {
+            text-align: left;
+            font-size: 0.875rem;
+            padding: 0.6rem 0.8rem;
+            transition: all 0.3s;
+            border-radius: 0.5rem;
+        }
+
+        .quick-question-btn:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .feedback-btn:hover {
+            transform: translateX(5px);
+        }
+
+        .btn-outline-success:hover {
+            box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+        }
+
+        .btn-outline-warning:hover {
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-outline-danger:hover {
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        /* 載入動畫 */
+        .typing-indicator {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #9ca3af;
+            animation: typingAnimation 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* 滾動條樣式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 991px) {
+            .chat-card {
+                height: 500px;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .chat-input-area {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-card {
+                height: 400px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.getElementById('chatForm');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const quickQuestionBtns = document.querySelectorAll('.quick-question-btn');
+        const feedbackBtns = document.querySelectorAll('.feedback-btn');
+
+        // 自動調整 textarea 高度
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // 發送訊息
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+            }
+        });
+
+        // 快速提問按鈕
+        quickQuestionBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const question = this.getAttribute('data-question');
+                sendMessage(question);
+            });
+        });
+
+        // 理解程度回饋按鈕
+        feedbackBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const feedback = this.getAttribute('data-feedback');
+                const level = this.getAttribute('data-level');
+                sendFeedback(feedback, level);
+            });
+        });
+
+        // 發送訊息函數
+        function sendMessage(message) {
+            // 顯示用戶訊息
+            addMessage(message, 'user');
+
+            // 禁用輸入
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+
+            // 顯示載入動畫
+            showTypingIndicator();
+
+            // 模擬 AI 回覆 (之後替換為真實 API 呼叫)
+            setTimeout(() => {
+                removeTypingIndicator();
+                const aiResponse = generateMockResponse(message);
+                addMessage(aiResponse, 'ai');
+
+                // 啟用輸入
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }, 1500 + Math.random() * 1000);
+        }
+
+        // 發送理解程度回饋
+        function sendFeedback(feedback, level) {
+            const message = `我目前的理解程度：${feedback}`;
+            addMessage(message, 'user');
+
+            // 禁用輸入
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+
+            // 顯示載入動畫
+            showTypingIndicator();
+
+            // 根據理解程度給予不同回覆
+            setTimeout(() => {
+                removeTypingIndicator();
+                let aiResponse = '';
+
+                switch(level) {
+                    case 'understand':
+                        aiResponse = '太棒了！👏 看來你已經完全掌握這個概念了。\n\n要不要試試更進階的題目來挑戰自己？或者我可以為你介紹下一個主題。';
+                        break;
+                    case 'mostly':
+                        aiResponse = '很好！😊 你已經理解了大部分內容。\n\n我可以針對你不太確定的部分再詳細說明，或者提供一些練習題來鞏固你的理解。需要我做什麼嗎？';
+                        break;
+                    case 'partial':
+                        aiResponse = '沒關係，學習需要時間。💡 讓我用另一種方式來解釋這個概念。\n\n我會用更簡單的例子和步驟來說明。你也可以告訴我具體哪個部分不太理解，我會特別針對那個部分加強說明。';
+                        break;
+                    case 'confused':
+                        aiResponse = '別擔心，我會幫助你！🤝 讓我們從最基礎的部分開始。\n\n我會把這個概念拆解成更小的步驟，一步一步帶你理解。你可以隨時打斷我提問，我們一起把它搞懂！';
+                        break;
+                }
+
+                addMessage(aiResponse, 'ai');
+
+                // 啟用輸入
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+            }, 1500);
+        }
+
+        // 添加訊息到聊天視窗
+        function addMessage(text, sender) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `message-wrapper ${sender}-message`;
+
+            const currentTime = new Date().toLocaleTimeString('zh-TW', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const avatarIcon = sender === 'ai' ? 'bi-robot' : 'bi-person-circle';
+            const senderName = sender === 'ai' ? 'AI 助教' : '你';
+            const bubbleClass = sender === 'ai' ? 'ai' : 'user';
+
+            messageWrapper.innerHTML = `
+            <div class="message-avatar">
+                <i class="bi ${avatarIcon}"></i>
+            </div>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-sender">${senderName}</span>
+                    <span class="message-time">${currentTime}</span>
+                </div>
+                <div class="message-bubble ${bubbleClass}">
+                    <p class="mb-0">${text}</p>
+                </div>
+            </div>
+        `;
+
+            chatMessages.appendChild(messageWrapper);
+            scrollToBottom();
+        }
+
+        // 顯示載入動畫
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'message-wrapper ai-message';
+            indicator.id = 'typingIndicator';
+            indicator.innerHTML = `
+            <div class="message-avatar">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div class="message-content">
+                <div class="message-bubble ai">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+            chatMessages.appendChild(indicator);
+            scrollToBottom();
+        }
+
+        // 移除載入動畫
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // 滾動到底部（平滑滾動）
+        function scrollToBottom() {
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // 模擬 AI 回覆 (之後替換為真實 API)
+        function generateMockResponse(question) {
+            const responses = [
+                '這是一個很好的問題！讓我為你詳細解釋一下...\n\n',
+                '根據課程內容，我可以告訴你...\n\n',
+                '這個概念確實很重要。簡單來說...\n\n',
+                '讓我用一個例子來說明這個問題...\n\n',
+                '這涉及到幾個關鍵點：\n\n',
+            ];
+
+            const details = [
+                '這個主題在考試中經常出現，建議你多加練習。',
+                '你可以參考課程的相關章節來深入了解。',
+                '如果還有不清楚的地方，歡迎繼續提問！',
+                '建議你做一些相關的練習題來加強理解。',
+                '這個概念與之前學過的內容有關聯，可以一起複習。',
+            ];
+
+            // 檢查是否是請求題目
+            if (question.includes('題目') || question.includes('練習') || question.includes('挑戰')) {
+                return '📝 這是一個模擬題目：\n\n題目：請計算 2 + 2 = ?\n\n提示：這是一個基礎的數學運算題。\n\n你可以試著解答，我會為你檢查答案並提供解析。';
+            }
+
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            const randomDetail = details[Math.floor(Math.random() * details.length)];
+
+            return `${randomResponse}${randomDetail}`;
+        }
+
+        // Enter 鍵發送 (Shift+Enter 換行)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // 頁面載入時滾動到底部
+        window.addEventListener('load', scrollToBottom);
+    </script>
+{% endblock %}
