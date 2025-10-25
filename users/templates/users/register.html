@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}學生註冊{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .register-form {
+            max-width: 400px;
+            margin: 50px auto;
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-submit:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .messages {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="register-form">
+        <h2 style="text-align: center;">學生註冊</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-submit">註冊</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CramSchool{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --accent-color: #0ea5e9;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+
+        /* 導航列 */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1.5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-custom .navbar-brand i {
+            font-size: 1.5rem;
+        }
+
+        .toggle-sidebar-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+            margin-right: 1rem;
+        }
+
+        .toggle-sidebar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+
+        .user-dropdown .dropdown-toggle {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+
+        .user-dropdown .dropdown-toggle::after {
+            border-top-color: rgba(255, 255, 255, 0.85);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        /* 側邊欄 */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: calc(100vh - 60px);
+            background: white;
+            position: fixed;
+            left: 0;
+            top: 60px;
+            overflow-y: auto;
+            border-right: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+            z-index: 1020;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .sidebar-menu-item {
+            position: relative;
+            margin: 0.25rem 0;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            color: #4b5563;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-menu-link:hover {
+            background-color: #f3f4f6;
+            border-left-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .sidebar-menu-link.active {
+            background-color: #f3f4f6;
+            border-left-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .sidebar-menu-link i {
+            font-size: 1.25rem;
+            min-width: 1.5rem;
+            text-align: center;
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            transition: opacity 0.3s;
+            overflow: hidden;
+
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            display: none;
+            width: 0;
+        }
+
+        /* 主容器 */
+        .main-wrapper {
+            margin-top: 60px;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 有側邊欄時的主容器 */
+        body.has-sidebar .main-wrapper {
+            margin-left: var(--sidebar-width);
+        }
+
+        body.has-sidebar .main-wrapper.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+
+        /* 頁面標題 */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: #6b7280;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            font-weight: 500;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline-primary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        /* 卡片 */
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* 表格 */
+        .table {
+            background-color: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background-color: #f3f4f6;
+            border-color: #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+            padding: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-color: #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                height: 100%;
+                top: 0;
+                z-index: 1099;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            body.has-sidebar .main-wrapper,
+            body.has-sidebar .main-wrapper.sidebar-collapsed {
+                margin-left: 0;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .navbar-custom {
+                padding: 0.5rem 1rem;
+            }
+
+            .user-dropdown .dropdown-menu {
+                right: 0 !important;
+                left: auto !important;
+            }
+
+            .navbar-nav {
+                margin-left: auto;
+            }
+
+            .navbar-nav .nav-link {
+                margin-left: 0.5rem;
+            }
+
+            .user-info {
+                display: none !important;
+            }
+        }
+
+        /* 視覺效果增強 */
+        .badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .alert {
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1.5rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        /* 加載動畫 */
+        .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-width: 0.25em;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body {% if user.is_authenticated %} class="has-sidebar"{% endif %}>
+<!-- 導航列 -->
+<nav class="navbar-custom">
+    {% if user.is_authenticated %}
+        <button class="toggle-sidebar-btn" id="toggleSidebar" title="切換側邊欄">
+            <i class="bi bi-list"></i>
+        </button>
+    {% endif %}
+    <a class="navbar-brand" href="/">
+        <i class="bi bi-book"></i>
+        <span>CramSchool</span>
+    </a>
+
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <div class="d-none d-md-flex align-items-center user-info">
+            {% if user.is_authenticated %}
+                <div class="text-white" style="font-size: 0.9rem;">
+                    <div style="font-weight: 500;">{{ user.username }}</div>
+                    <div style="opacity: 0.8; font-size: 0.85rem;">
+                        {% if user.role %}
+                            {{ user.get_role_display }}
+                        {% else %}
+                            使用者
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+            <div class="dropdown user-dropdown">
+                <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/admin/"><i class="bi bi-gear"></i> 管理後台</a></li>
+                    <li><a class="dropdown-item" href="/account/"><i class="bi bi-person"></i> 帳號設定</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> 登出</a></li>
+                </ul>
+            </div>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-in-right"></i> 登入
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-in-right"></i> 註冊
+            </a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- 側邊欄 -->
+
+{% if user.is_authenticated %}
+    <aside class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="/" class="sidebar-menu-link active">
+                    <i class="bi bi-house-door"></i>
+                    <span class="menu-text">首頁</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'course_list' %}" class="sidebar-menu-link">
+                    <i class="bi bi-book"></i>
+                    <span class="menu-text">課程</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="/assessments/" class="sidebar-menu-link">
+                    <i class="bi bi-pencil-square"></i>
+                    <span class="menu-text">試卷</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="/enrollments/" class="sidebar-menu-link">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="menu-text">報名</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="/users/" class="sidebar-menu-link">
+                    <i class="bi bi-people"></i>
+                    <span class="menu-text">使用者</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+{% endif %}
+
+<!-- 主內容 -->
+<div class="main-wrapper" id="mainwrapper">
+    <div class="main-content">
+        {% block page_header %}
+            <div class="page-header">
+                <h1 class="page-title">{% block page_title %}歡迎{% endblock %}</h1>
+                <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
+            </div>
+        {% endblock %}
+
+        {% block content %}
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-muted">頁面內容將在這裡顯示...</p>
+                </div>
+            </div>
+        {% endblock %}
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 CramSchool. 版權所有。</p>
+    </footer>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // 側邊欄切換
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mainWrapper = document.getElementById('mainwrapper');
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.toggle('collapsed');
+                mainWrapper.classList.toggle('sidebar-collapsed');
+            } else {
+                sidebar.classList.toggle('open');
+            }
+        });
+    }
+
+    // 手機版點擊菜單時自動關閉側邊欄
+    document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.remove('open');
+            }
+        });
+    });
+
+    // 窗口大小改變時的處理
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768 && sidebar) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // 標記當前頁面的菜單項
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+        link.classList.remove('active'); // 先移除所有 active
+
+        const href = link.getAttribute('href');
+
+        if (href === '/') {
+            // 首頁只在完全匹配時才標記
+            if (currentPath === '/' || currentPath === '') {
+                link.classList.add('active');
+            }
+        } else if (currentPath.startsWith(href)) {
+            // 其他頁面使用開頭匹配
+            link.classList.add('active');
+        }
+    });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

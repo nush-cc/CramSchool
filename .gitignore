@@ -46,3 +46,5 @@ htmlcov/
 *.bak
 *.tmp
 Thumbs.db
+courses/management/commands
+data/

@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block title %}課程列表 - CramSchool{% endblock %}
+
+{% block page_title %}課程列表{% endblock %}
+{% block page_subtitle %}瀏覽所有可用的課程{% endblock %}
+
+{% block content %}
+    <!-- 搜尋與篩選 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'course_list' %}" id="filterForm">
+                <div class="row g-3">
+                    <!-- 搜尋關鍵字 -->
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">
+                            <i class="bi bi-search"></i> 搜尋關鍵字
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="search"
+                               name="search"
+                               placeholder="輸入課程標題或描述..."
+                               value="{{ request.GET.search }}">
+                    </div>
+
+                    <!-- 科目篩選 -->
+                    <div class="col-md-3">
+                        <label for="subject" class="form-label">
+                            <i class="bi bi-journal-text"></i> 科目
+                        </label>
+                        <select class="form-select" id="subject" name="subject">
+                            <option value="">所有科目</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- 年級篩選 -->
+                    <div class="col-md-3">
+                        <label for="grade" class="form-label">
+                            <i class="bi bi-mortarboard"></i> 年級
+                        </label>
+                        <select class="form-select" id="grade" name="grade">
+                            <option value="">所有年級</option>
+                            {% for grade in grades %}
+                                <option value="{{ grade.id }}">{{ grade }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- 搜尋按鈕 -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> 搜尋
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 清除篩選 -->
+                {% if request.GET.search or request.GET.subject or request.GET.grade %}
+                    <div class="mt-3">
+                        <a href="{% url 'course_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-x-circle"></i> 清除篩選
+                        </a>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- 新增課程按鈕 -->
+    {% if user.is_authenticated %}
+        {% if user.role == 'teacher' or user.role == 'admin' %}
+            <div class="mb-4">
+                <a href="{% url 'course_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 新增課程
+                </a>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- 課程列表 -->
+    {% if courses %}
+        <div class="row">
+            {% for course in courses %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <!-- 課程標題 -->
+                            <h5 class="card-title mb-3">
+                                <a href="{% url 'course_detail' course.pk %}"
+                                   class="text-decoration-none text-dark">
+                                    {{ course.title }}
+                                </a>
+                            </h5>
+
+                            <!-- 課程資訊 -->
+                            <div class="mb-3">
+                            <span class="badge bg-primary me-2">
+                                <i class="bi bi-journal-text"></i> {{ course.subject.name }}
+                            </span>
+                                <span class="badge bg-info">
+                                <i class="bi bi-mortarboard"></i> {{ course.grade }}
+                            </span>
+                            </div>
+
+                            <!-- 課程描述 -->
+                            {% if course.description %}
+                                <p class="card-text text-muted small mb-3">
+                                    {{ course.description|truncatewords:20 }}
+                                </p>
+                            {% else %}
+                                <p class="card-text text-muted small mb-3 fst-italic">
+                                    尚無課程描述
+                                </p>
+                            {% endif %}
+
+                            <!-- 教師資訊 -->
+                            <div class="mt-auto">
+                                <div class="text-muted small mb-3">
+                                    <i class="bi bi-person"></i>
+                                    {% if course.teacher %}
+                                        {{ course.teacher.username }}
+                                    {% else %}
+                                        未指定教師
+                                    {% endif %}
+                                </div>
+
+                                <!-- 操作按鈕 -->
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'course_detail' course.pk %}"
+                                       class="btn btn-outline-primary btn-sm flex-grow-1">
+                                        <i class="bi bi-eye"></i> 查看
+                                    </a>
+
+                                    {% if user.is_authenticated %}
+                                        {% if user == course.teacher or user.role == 'admin' %}
+                                            <a href="{% url 'course_edit' course.pk %}"
+                                               class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'course_delete' course.pk %}"
+                                               class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 建立時間 -->
+                        <div class="card-footer text-muted small">
+                            <i class="bi bi-clock"></i> {{ course.created_at|date:"Y/m/d" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- 分頁 -->
+        {% if courses.has_other_pages %}
+            <nav aria-label="課程分頁">
+                <ul class="pagination justify-content-center">
+                    <!-- 上一頁 -->
+                    {% if courses.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ courses.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.grade %}&grade={{ request.GET.grade }}{% endif %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                        </li>
+                    {% endif %}
+
+                    <!-- 頁碼 -->
+                    {% for num in courses.paginator.page_range %}
+                        {% if courses.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > courses.number|add:'-3' and num < courses.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.grade %}&grade={{ request.GET.grade }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- 下一頁 -->
+                    {% if courses.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ courses.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.grade %}&grade={{ request.GET.grade }}{% endif %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- 分頁資訊 -->
+            <div class="text-center text-muted small">
+                顯示第 {{ courses.start_index }} - {{ courses.end_index }} 筆,共 {{ courses.paginator.count }} 筆課程
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- 無課程時的提示 -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                <h5 class="text-muted mb-3">目前沒有課程</h5>
+                {% if request.GET.search or request.GET.subject or request.GET.grade %}
+                    <p class="text-muted">沒有符合搜尋條件的課程,請嘗試調整篩選條件。</p>
+                    <a href="{% url 'course_list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-counterclockwise"></i> 查看所有課程
+                    </a>
+                {% else %}
+                    <p class="text-muted">系統中尚未建立任何課程。</p>
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'teacher' or user.role == 'admin' %}
+                            <a href="{% url 'course_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> 立即新增課程
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // 設置篩選器的選中狀態
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // 設置科目選中狀態
+            const subjectParam = urlParams.get('subject');
+            if (subjectParam) {
+                const subjectSelect = document.getElementById('subject');
+                subjectSelect.value = subjectParam;
+            }
+
+            // 設置年級選中狀態
+            const gradeParam = urlParams.get('grade');
+            if (gradeParam) {
+                const gradeSelect = document.getElementById('grade');
+                gradeSelect.value = gradeParam;
+            }
+        });
+    </script>
+{% endblock %}
