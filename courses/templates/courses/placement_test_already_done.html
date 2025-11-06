@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}預先測驗 - CramSchool{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-check-circle text-info"></i> 預先測驗已完成
+{% endblock %}
+
+{% block content %}
+    <div class="result-container">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> 提示
+                </h5>
+            </div>
+            <div class="card-body text-center py-5">
+                <h3 class="mb-4">您已完成預先測驗</h3>
+                
+                <div class="alert alert-info" role="alert">
+                    您目前被分配到 <strong>{{ level }} 組</strong>，分數為 <strong>{{ score|floatformat:1 }}%</strong>
+                </div>
+                
+                <p class="text-muted mb-4">
+                    如需重新測驗，請聯繫管理員。
+                </p>
+                
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-book"></i> 查看課程
+                    </a>
+                    <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-house"></i> 返回首頁
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

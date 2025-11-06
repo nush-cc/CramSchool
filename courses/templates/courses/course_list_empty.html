@@ -1,0 +1,186 @@
+{# courses/templates/courses/course_list_empty.html #}
+{% extends 'base.html' %}
+
+{% block title %}課程列表 - CramSchool{% endblock %}
+
+{% block page_title %}課程列表{% endblock %}
+{% block page_subtitle %}瀏覽並選擇您要學習的課程{% endblock %}
+
+{% block content %}
+    <!-- 空狀態提示 -->
+    <div class="empty-state-container">
+        <div class="card border-0">
+            <div class="card-body text-center py-5">
+                <!-- 大圖示 -->
+                <div class="display-1 mb-4">
+                    <i class="bi bi-book text-primary"></i>
+                </div>
+
+                <!-- 提示標題 -->
+                <h4 class="mb-3 text-dark">
+                    您還未選擇課程
+                </h4>
+
+                <!-- 提示描述 -->
+                <p class="text-muted mb-4" style="font-size: 1.05rem; line-height: 1.6;">
+                    為了查看課程內容，您需要先在選課系統中選擇感興趣的課程。
+                    <br>
+                    <br>
+                    <strong>選課步驟：</strong>
+                </p>
+
+                <!-- 步驟說明 -->
+                <div class="steps-container mb-5" style="max-width: 600px; margin: 0 auto;">
+                    <div class="step-item text-start mb-3">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>進入選課系統</strong>
+                            <p class="text-muted small mb-0">前往選課系統瀏覽所有可用課程</p>
+                        </div>
+                    </div>
+
+                    <div class="step-item text-start mb-3">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>選擇科目課程</strong>
+                            <p class="text-muted small mb-0">選擇感興趣的科目，申請選課</p>
+                        </div>
+                    </div>
+
+                    <div class="step-item text-start mb-3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>等候審核</strong>
+                            <p class="text-muted small mb-0">管理員會審核您的申請，核准後即可查看課程</p>
+                        </div>
+                    </div>
+
+                    <div class="step-item text-start">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>開始學習</strong>
+                            <p class="text-muted small mb-0">回到課程列表查看已選課程的所有內容</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 按鈕 -->
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{% url 'enrollments:enrollment_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle"></i> 前往選課系統
+                    </a>
+                    <a href="{% url 'core:home' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-house"></i> 返回首頁
+                    </a>
+                </div>
+
+                <!-- 輔助說明 -->
+                <div class="alert alert-info mt-4" role="alert">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>提示：</strong> 首次使用平台的學生需要先完成預先測驗進行分班，
+                    然後才能根據分班結果選擇對應科目的課程。
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .empty-state-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .card {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 步驟容器 */
+        .steps-container {
+            background: #f9fafb;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* 步驟項目 */
+        .step-item {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .step-content {
+            padding-top: 0.25rem;
+        }
+
+        .step-content strong {
+            color: #1f2937;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* 按鈕樣式 */
+        .btn-lg {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            .empty-state-container {
+                margin: 1rem;
+            }
+
+            .card-body {
+                padding: 2rem 1rem !important;
+            }
+
+            .steps-container {
+                padding: 1.5rem;
+            }
+
+            .step-item {
+                margin-bottom: 1.5rem;
+            }
+
+            .btn-lg {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .d-flex gap-3 {
+                flex-direction: column !important;
+            }
+
+            .btn-lg {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}

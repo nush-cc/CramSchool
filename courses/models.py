@@ -51,9 +51,23 @@ class Subject(models.Model):
 class Course(models.Model):
     """課程"""
 
+    COURSE_TYPE_CHOICES = [
+        ("regular", "一般課程"),
+        ("placement_test", "預先測驗"),
+    ]
+
     title = models.CharField(max_length=200, verbose_name="課程標題")
+    course_type = models.CharField(
+        max_length=20,
+        choices=COURSE_TYPE_CHOICES,
+        default="regular",
+        verbose_name="課程類型",
+    )
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, verbose_name="科目")
     grade = models.ForeignKey(Grade, on_delete=models.CASCADE, verbose_name="年級")
+    is_default_placement = models.BooleanField(
+        default=False, verbose_name="是否為預設預先測驗"
+    )
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -76,14 +90,24 @@ class Course(models.Model):
 class Chapter(models.Model):
     """章節"""
 
+    CHAPTER_TYPE_CHOICES = [
+        ("regular", "一般章節"),
+        ("placement_test", "預先測驗"),
+    ]
+
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
         related_name="chapters",
         verbose_name="所屬課程",
     )
+    chapter_type = models.CharField(
+        max_length=20,
+        choices=CHAPTER_TYPE_CHOICES,
+        default="regular",
+        verbose_name="章節類型",
+    )
     title = models.CharField(max_length=200, verbose_name="章節標題")
-    # order = models.IntegerField(verbose_name='排序')
 
     class Meta:
         verbose_name = "章節"

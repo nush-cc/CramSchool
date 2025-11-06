@@ -392,6 +392,45 @@
                 height: 400px;
             }
         }
+        /* 確保聊天容器佔滿剩餘空間 */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 60px); /* 減去 navbar 高度 */
+        }
+
+        .chat-container-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .chat-container-wrapper .row {
+            flex: 1;
+            margin: 0;
+        }
+
+        .chat-card {
+            height: calc(100vh - 60px - 4rem - 100px); /* navbar + padding + 其他元素 */
+            min-height: 500px;
+            max-height: calc(100vh - 200px);
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 991px) {
+            .chat-card {
+                height: calc(100vh - 60px - 3rem - 100px);
+                min-height: 450px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-card {
+                height: calc(100vh - 60px - 2rem - 100px);
+                min-height: 400px;
+            }
+        }
     </style>
 {% endblock %}
 
