@@ -11,7 +11,7 @@
 {% block content %}
     <!-- 返回按鈕 -->
     <div class="mb-4">
-        <a href="{% url 'course_detail' object.pk %}" class="btn btn-outline-secondary">
+        <a href="{% url 'courses:course_detail' object.pk %}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> 返回課程詳情
         </a>
     </div>
@@ -147,7 +147,7 @@
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash-fill"></i> 確認刪除
                     </button>
-                    <a href="{% url 'course_detail' object.pk %}" class="btn btn-secondary">
+                    <a href="{% url 'courses:course_detail' object.pk %}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i> 取消
                     </a>
                 </div>

@@ -13,7 +13,7 @@
                 <p class="page-subtitle mb-0">{{ course.title }} - {{ course.grade }}</p>
             </div>
             <div>
-                <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary">
+                <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary">
                     <i class="bi bi-x-lg"></i> 結束問答
                 </a>
             </div>

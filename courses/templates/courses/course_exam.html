@@ -56,7 +56,7 @@
         </div>
 
         <!-- 考試表單 -->
-        <form method="post" action="{% url 'course_exam_submit' course.pk %}" id="examForm">
+        <form method="post" action="{% url 'courses:course_exam_submit' course.pk %}" id="examForm">
             {% csrf_token %}
 
             <!-- 題目列表 -->
@@ -116,7 +116,7 @@
                         <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
                             <i class="bi bi-send-fill"></i> 提交考卷
                         </button>
-                        <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
+                        <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
                             <i class="bi bi-x-circle"></i> 取消測驗
                         </a>
                     </div>
