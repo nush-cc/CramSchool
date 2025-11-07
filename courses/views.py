@@ -23,6 +23,10 @@ def course_list(request):
         # 未登入用戶重導向到登入頁面
         return redirect("login")
 
+    if request.user.placement_test_score is None:
+        # 還沒完成預先測驗
+        return render(request, "courses/course_list_no_placement_test.html", {})
+
     # 獲取學生已核准的選課記錄
     approved_enrollments = Enrollment.objects.filter(
         student=request.user, status="approved"
@@ -114,7 +118,7 @@ def course_detail(request, pk):
 
     # 如果學生沒有選課，重導向到課程列表
     if not is_enrolled and not request.user.is_staff:
-        return redirect("course_list")
+        return redirect("courses:course_list")
 
     context = {
         "course": course,

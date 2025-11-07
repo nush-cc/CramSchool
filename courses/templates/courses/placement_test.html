@@ -14,8 +14,8 @@
         <div class="card mb-4 border-warning">
             <div class="card-header bg-warning text-dark">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-info-circle"></i> 預先測驗資訊
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-info-circle text-white"></i> 預先測驗資訊
                     </h5>
                     <span class="badge bg-light text-warning">
                         共 {{ total_questions }} 題
@@ -56,7 +56,7 @@
         </div>
 
         <!-- 考試表單 -->
-        <form method="post" action="{% url 'placement_test_submit' %}" id="examForm">
+        <form method="post" action="{% url 'courses:placement_test_submit' %}" id="examForm">
             {% csrf_token %}
 
             <!-- 題目列表 -->
@@ -116,7 +116,7 @@
                         <button type="submit" class="btn btn-warning btn-lg" id="submitBtn">
                             <i class="bi bi-send-fill"></i> 提交測驗
                         </button>
-                        <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
+                        <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
                             <i class="bi bi-x-circle"></i> 取消測驗
                         </a>
                     </div>

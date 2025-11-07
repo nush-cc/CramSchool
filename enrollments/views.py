@@ -12,6 +12,10 @@ from enrollments.models import Enrollment
 def enrollment_list(request):
     """選課系統首頁 - 按科目+年級分組"""
 
+    if request.user.placement_test_score is None:
+        # 還沒完成預先測驗
+        return render(request, "courses/course_list_no_placement_test.html", {})
+
     # 只顯示一般課程，排除預先測驗
     courses = Course.objects.filter(
         course_type="regular", is_active=True
