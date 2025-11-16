@@ -330,6 +330,14 @@ def course_exam_submit(request, pk):
                 "is_correct": is_correct,
             }
         )
+        
+        # 💾 保存作答記錄到 StudentAnswer（保留所有紀錄）
+        StudentAnswer.objects.create(
+            student=request.user,
+            question=question,
+            selected_choice=user_choice,
+            is_correct=is_correct,
+        )
 
     # 計算分數
     score = (

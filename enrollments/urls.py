@@ -8,8 +8,6 @@ app_name = "enrollments"
 urlpatterns = [
     # 選課系統首頁 - 按科目分組顯示課程
     path("", views.enrollment_list, name="enrollment_list"),
-    # 我的課程 - 已選課程
-    path("my-courses/", views.my_courses, name="my_courses"),
     # 申請選課
     path("enroll/<int:course_id>/", views.enroll_course, name="enroll_course"),
     # 核准選課（管理員）

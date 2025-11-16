@@ -5,281 +5,278 @@
 
 {% block page_title %}課程列表{% endblock %}
 {% block page_subtitle %}
-    {% if enrolled_subjects_count == 1 %}
-        您已選 {{ enrolled_subjects_count }} 個科目的課程
-    {% else %}
-        您已選 {{ enrolled_subjects_count }} 個科目的課程
-    {% endif %}
+{% if enrolled_subjects_count == 1 %}
+您已選 {{ enrolled_subjects_count }} 個科目的課程
+{% else %}
+您已選 {{ enrolled_subjects_count }} 個科目的課程
+{% endif %}
 {% endblock %}
 
 {% block content %}
-    <!-- 搜尋與篩選 -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" action="{% url 'courses:course_list' %}" id="filterForm">
-                <div class="row g-3">
-                    <!-- 搜尋關鍵字 -->
-                    <div class="col-md-4">
-                        <label for="search" class="form-label">
-                            <i class="bi bi-search"></i> 搜尋關鍵字
-                        </label>
-                        <input type="text"
-                               class="form-control"
-                               id="search"
-                               name="search"
-                               placeholder="輸入課程標題或描述..."
-                               value="{{ request.GET.search }}">
-                    </div>
-
-                    <!-- 科目篩選（只顯示已選的科目） -->
-                    <div class="col-md-3">
-                        <label for="subject" class="form-label">
-                            <i class="bi bi-journal-text"></i> 科目
-                        </label>
-                        <select class="form-select" id="subject" name="subject">
-                            <option value="">所有已選科目</option>
-                            {% for subject in subjects %}
-                                <option value="{{ subject.id }}" 
-                                        {% if request.GET.subject|stringformat:"s" == subject.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ subject.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- 年級篩選 -->
-                    <div class="col-md-3">
-                        <label for="grade" class="form-label">
-                            <i class="bi bi-mortarboard"></i> 年級
-                        </label>
-                        <select class="form-select" id="grade" name="grade">
-                            <option value="">所有年級</option>
-                            {% for grade in grades %}
-                                <option value="{{ grade.id }}"
-                                        {% if request.GET.grade|stringformat:"s" == grade.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ grade }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- 搜尋按鈕 -->
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i> 搜尋
-                        </button>
-                    </div>
+<!-- 搜尋與篩選 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{% url 'courses:course_list' %}" id="filterForm">
+            <div class="row g-3">
+                <!-- 搜尋關鍵字 -->
+                <div class="col-md-4">
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search"></i> 搜尋關鍵字
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="輸入課程標題或描述..."
+                        value="{{ request.GET.search }}">
                 </div>
 
-                <!-- 清除篩選 -->
-                {% if request.GET.search or request.GET.subject or request.GET.grade %}
-                    <div class="mt-3">
-                        <a href="{% url 'course_list' %}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-x-circle"></i> 清除篩選
-                        </a>
-                    </div>
-                {% endif %}
-            </form>
+                <!-- 科目篩選（只顯示已選的科目） -->
+                <div class="col-md-3">
+                    <label for="subject" class="form-label">
+                        <i class="bi bi-journal-text"></i> 科目
+                    </label>
+                    <select class="form-select" id="subject" name="subject">
+                        <option value="">所有已選科目</option>
+                        {% for subject in subjects %}
+                        {% if request.GET.subject|stringformat:"s" == subject.id|stringformat:"s" %}
+                        <option value="{{ subject.id }}" selected>{{ subject.name }}</option>
+                        {% else %}
+                        <option value="{{ subject.id }}">{{ subject.name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 年級篩選 -->
+                <div class="col-md-3">
+                    <label for="grade" class="form-label">
+                        <i class="bi bi-mortarboard"></i> 年級
+                    </label>
+                    <select class="form-select" id="grade" name="grade">
+                        <option value="">所有年級</option>
+                        {% for grade in grades %}
+                        {% if request.GET.grade|stringformat:"s" == grade.id|stringformat:"s" %}
+                        <option value="{{ grade.id }}" selected>{{ grade }}</option>
+                        {% else %}
+                        <option value="{{ grade.id }}">{{ grade }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 搜尋按鈕 -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> 搜尋
+                    </button>
+                </div>
+            </div>
+
+            <!-- 清除篩選 -->
+            {% if request.GET.search or request.GET.subject or request.GET.grade %}
+            <div class="mt-3">
+                <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle"></i> 清除篩選
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- 課程分組列表 -->
+{% if grouped_courses %}
+{% for group in grouped_courses %}
+<!-- 科目分組卡片 -->
+<div class="card mb-5 subject-group-card">
+    <!-- 科目標題 -->
+    <div class="card-header subject-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-folder2"></i>
+                <strong>{{ group.subject_name }}</strong>
+            </h5>
+            <span class="badge bg-light text-dark">
+                <i class="bi bi-book"></i> {{ group.data.courses|length }} 門課程
+            </span>
         </div>
     </div>
 
-    <!-- 課程分組列表 -->
-    {% if grouped_courses %}
-        {% for group in grouped_courses %}
-            <!-- 科目分組卡片 -->
-            <div class="card mb-5 subject-group-card">
-                <!-- 科目標題 -->
-                <div class="card-header subject-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="bi bi-folder2"></i> 
-                            <strong>{{ group.subject_name }}</strong>
-                        </h5>
-                        <span class="badge bg-light text-dark">
-                            <i class="bi bi-book"></i> {{ group.data.courses|length }} 門課程
-                        </span>
+    <!-- 課程列表 -->
+    <div class="card-body p-0">
+        <div class="row g-0">
+            {% for course in group.data.courses %}
+            <div class="col-md-6 col-lg-4 p-3 course-item-wrapper">
+                <div class="card h-100 course-card">
+                    <div class="card-body d-flex flex-column">
+                        <!-- 課程標題 -->
+                        <h6 class="card-title mb-3">
+                            <a href="{% url 'courses:course_detail' course.pk %}"
+                                class="text-decoration-none text-dark">
+                                {{ course.title }}
+                            </a>
+                        </h6>
+
+                        <!-- 課程資訊 -->
+                        <div class="mb-3">
+                            <span class="badge bg-info me-2">
+                                <i class="bi bi-mortarboard"></i> {{ course.grade.name }}
+                            </span>
+                        </div>
+
+                        <!-- 課程描述 -->
+                        {% if course.description %}
+                        <p class="card-text text-muted small mb-3 flex-grow-1">
+                            {{ course.description|truncatewords:20 }}
+                        </p>
+                        {% else %}
+                        <p class="card-text text-muted small mb-3 fst-italic flex-grow-1">
+                            尚無課程描述
+                        </p>
+                        {% endif %}
+
+                        <!-- 教師資訊 -->
+                        <div class="text-muted small mb-3">
+                            <i class="bi bi-person"></i>
+                            {% if course.teacher %}
+                            {{ course.teacher.username }}
+                            {% else %}
+                            未指定教師
+                            {% endif %}
+                        </div>
+
+                        <!-- 操作按鈕 -->
+                        <div class="d-flex gap-2 mt-auto">
+                            <a href="{% url 'courses:course_detail' course.pk %}"
+                                class="btn btn-outline-primary btn-sm flex-grow-1">
+                                <i class="bi bi-eye"></i> 查看
+                            </a>
+
+                            {% if user.is_authenticated %}
+                            {% if user == course.teacher or user.role == 'admin' %}
+                            <a href="{% url 'courses:course_edit' course.pk %}"
+                                class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'courses:course_delete' course.pk %}" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
 
-                <!-- 課程列表 -->
-                <div class="card-body p-0">
-                    <div class="row g-0">
-                        {% for course in group.data.courses %}
-                            <div class="col-md-6 col-lg-4 p-3 course-item-wrapper">
-                                <div class="card h-100 course-card">
-                                    <div class="card-body d-flex flex-column">
-                                        <!-- 課程標題 -->
-                                        <h6 class="card-title mb-3">
-                                            <a href="{% url 'courses:course_detail' course.pk %}"
-                                               class="text-decoration-none text-dark">
-                                                {{ course.title }}
-                                            </a>
-                                        </h6>
-
-                                        <!-- 課程資訊 -->
-                                        <div class="mb-3">
-                                            <span class="badge bg-info me-2">
-                                                <i class="bi bi-mortarboard"></i> {{ course.grade.name }}
-                                            </span>
-                                        </div>
-
-                                        <!-- 課程描述 -->
-                                        {% if course.description %}
-                                            <p class="card-text text-muted small mb-3 flex-grow-1">
-                                                {{ course.description|truncatewords:20 }}
-                                            </p>
-                                        {% else %}
-                                            <p class="card-text text-muted small mb-3 fst-italic flex-grow-1">
-                                                尚無課程描述
-                                            </p>
-                                        {% endif %}
-
-                                        <!-- 教師資訊 -->
-                                        <div class="text-muted small mb-3">
-                                            <i class="bi bi-person"></i>
-                                            {% if course.teacher %}
-                                                {{ course.teacher.username }}
-                                            {% else %}
-                                                未指定教師
-                                            {% endif %}
-                                        </div>
-
-                                        <!-- 操作按鈕 -->
-                                        <div class="d-flex gap-2 mt-auto">
-                                            <a href="{% url 'courses:course_detail' course.pk %}"
-                                               class="btn btn-outline-primary btn-sm flex-grow-1">
-                                                <i class="bi bi-eye"></i> 查看
-                                            </a>
-
-                                            {% if user.is_authenticated %}
-                                                {% if user == course.teacher or user.role == 'admin' %}
-                                                    <a href="{% url 'course_edit' course.pk %}"
-                                                       class="btn btn-outline-secondary btn-sm">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <a href="{% url 'course_delete' course.pk %}"
-                                                       class="btn btn-outline-danger btn-sm">
-                                                        <i class="bi bi-trash"></i>
-                                                    </a>
-                                                {% endif %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-
-                                    <!-- 建立時間 -->
-                                    <div class="card-footer text-muted small">
-                                        <i class="bi bi-clock"></i> {{ course.created_at|date:"Y/m/d" }}
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
+                    <!-- 建立時間 -->
+                    <div class="card-footer text-muted small">
+                        <i class="bi bi-clock"></i> {{ course.created_at|date:"Y/m/d" }}
                     </div>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
 
-        <!-- 頁面說明 -->
-        <div class="alert alert-info" role="alert">
-            <i class="bi bi-info-circle"></i> 
-            您正在查看已選科目的課程。共顯示 <strong>{{ total_courses }}</strong> 門課程。
-        </div>
-    {% else %}
-        <!-- 無課程提示 -->
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bi bi-inbox display-1 text-muted mb-3"></i>
-                <h5 class="text-muted mb-3">目前沒有符合條件的課程</h5>
-                <p class="text-muted">未找到符合搜尋條件的課程，請調整篩選條件。</p>
-                <a href="{% url 'course_list' %}" class="btn btn-outline-primary">
-                    <i class="bi bi-arrow-counterclockwise"></i> 清除篩選
-                </a>
-            </div>
-        </div>
-    {% endif %}
+<!-- 頁面說明 -->
+<div class="alert alert-info" role="alert">
+    <i class="bi bi-info-circle"></i>
+    您正在查看已選科目的課程。共顯示 <strong>{{ total_courses }}</strong> 門課程。
+</div>
+{% else %}
+<!-- 無課程提示 -->
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+        <h5 class="text-muted mb-3">目前沒有符合條件的課程</h5>
+        <p class="text-muted">未找到符合搜尋條件的課程，請調整篩選條件。</p>
+        <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-counterclockwise"></i> 清除篩選
+        </a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_css %}
-    <style>
-        /* 科目分組卡片 */
-        .subject-group-card {
-            border: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            margin-bottom: 2.5rem;
-            border-top: 4px solid #3b82f6;
-        }
+<style>
+    /* 科目分組卡片 */
+    .subject-group-card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 2.5rem;
+        border-top: 4px solid #3b82f6;
+    }
 
-        .subject-group-card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-        }
+    .subject-group-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
 
-        /* 科目標題 */
-        .subject-header {
-            background: linear-gradient(135deg, #f0f4ff 0%, #f9fbff 100%);
-            border-bottom: 2px solid #e5e7eb;
-            padding: 1.25rem;
-        }
+    /* 科目標題 */
+    .subject-header {
+        background: linear-gradient(135deg, #f0f4ff 0%, #f9fbff 100%);
+        border-bottom: 2px solid #e5e7eb;
+        padding: 1.25rem;
+    }
 
-        .subject-header h5 {
-            color: #1e40af;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-        }
+    .subject-header h5 {
+        color: #1e40af;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
 
-        /* 課程項目包裝 */
-        .course-item-wrapper {
-            border-right: 1px solid #f0f0f0;
-            border-bottom: 1px solid #f0f0f0;
-        }
+    /* 課程項目包裝 */
+    .course-item-wrapper {
+        border-right: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
+    }
 
-        .course-item-wrapper:nth-child(3n) {
+    .course-item-wrapper:nth-child(3n) {
+        border-right: none;
+    }
+
+    /* 課程卡片 */
+    .course-card {
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .course-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        border-color: #3b82f6;
+    }
+
+    .course-card .card-title a:hover {
+        color: #3b82f6 !important;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 992px) {
+        .course-item-wrapper:nth-child(2n) {
             border-right: none;
         }
 
-        /* 課程卡片 */
-        .course-card {
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s ease;
-            background: white;
+        .course-item-wrapper:nth-child(3n) {
+            border-right: 1px solid #f0f0f0;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .course-item-wrapper {
+            border-right: none;
         }
 
-        .course-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-            border-color: #3b82f6;
+        .subject-header {
+            padding: 1rem;
         }
 
-        .course-card .card-title a:hover {
-            color: #3b82f6 !important;
+        .subject-header h5 {
+            font-size: 1rem;
         }
 
-        /* 響應式設計 */
-        @media (max-width: 992px) {
-            .course-item-wrapper:nth-child(2n) {
-                border-right: none;
-            }
-
-            .course-item-wrapper:nth-child(3n) {
-                border-right: 1px solid #f0f0f0;
-            }
+        .badge {
+            font-size: 0.75rem;
         }
-
-        @media (max-width: 768px) {
-            .course-item-wrapper {
-                border-right: none;
-            }
-
-            .subject-header {
-                padding: 1rem;
-            }
-
-            .subject-header h5 {
-                font-size: 1rem;
-            }
-
-            .badge {
-                font-size: 0.75rem;
-            }
-        }
-    </style>
+    }
+</style>
 {% endblock %}

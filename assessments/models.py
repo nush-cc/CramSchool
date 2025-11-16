@@ -44,6 +44,13 @@ class Question(models.Model):
     )
     order = models.IntegerField(verbose_name="題目順序")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="建立時間")
+    # 統計相關欄位
+    correct_count = models.IntegerField(default=0, verbose_name="正確作答人數")
+    total_attempts = models.IntegerField(default=0, verbose_name="總作答次數")
+    correct_rate = models.FloatField(default=0.0, verbose_name="正確率 (%)")
+    last_stat_updated = models.DateTimeField(
+        auto_now=True, verbose_name="最後統計更新時間"
+    )
 
     class Meta:
         verbose_name = "題目"

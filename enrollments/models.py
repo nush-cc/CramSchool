@@ -75,7 +75,8 @@ class StudentAnswer(models.Model):
     class Meta:
         verbose_name = "作答記錄"
         verbose_name_plural = "作答記錄"
-        unique_together = ["student", "question"]
+        # 移除 unique_together 以允許同一學生多次作答同一題
 
     def __str__(self):
         return f"{self.student.username} - {self.question}"
+

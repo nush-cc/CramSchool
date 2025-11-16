@@ -1,0 +1,72 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static %}
+
+{% block content_title %}
+<h1>題目管理</h1>
+{% endblock %}
+
+{% block search %}
+{{ block.super }}
+{% endblock %}
+
+{% block result_list %}
+<!-- 統計摘要卡片 -->
+<div
+    style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #0066cc;">
+    <h2 style="margin-top: 0; color: #0066cc;">📊 題目統計摘要</h2>
+
+    <!-- 難度分佈 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+        <div style="padding: 12px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-size: 24px; font-weight: bold; color: #28a745;">{{ difficulty_stats.easy }}</div>
+            <div style="font-size: 14px; color: #666; margin-top: 5px;">🟢 簡單題</div>
+        </div>
+
+        <div style="padding: 12px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-size: 24px; font-weight: bold; color: #ffc107;">{{ difficulty_stats.medium }}</div>
+            <div style="font-size: 14px; color: #666; margin-top: 5px;">🟡 中等題</div>
+        </div>
+
+        <div style="padding: 12px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="font-size: 24px; font-weight: bold; color: #dc3545;">{{ difficulty_stats.hard }}</div>
+            <div style="font-size: 14px; color: #666; margin-top: 5px;">🔴 困難題</div>
+        </div>
+    </div>
+
+    <!-- 總題數 -->
+    <div
+        style="padding: 10px; background-color: white; border-radius: 6px; border-left: 3px solid #0066cc; margin-bottom: 15px;">
+        <span style="font-size: 16px; color: #333;">📌 <strong>總題數：</strong></span>
+        <span style="font-size: 18px; font-weight: bold; color: #0066cc;">{{ difficulty_stats.total }}</span>
+    </div>
+
+    <!-- 作答表現 -->
+    <div style="padding-top: 15px; border-top: 1px solid #dee2e6;">
+        <h3 style="margin-top: 0; color: #666; font-size: 14px;">作答表現統計</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div
+                style="padding: 10px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="font-size: 20px; font-weight: bold; color: #6c757d;">{{ performance_stats.no_attempt }}
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">⏳ 尚無作答</div>
+            </div>
+
+            <div
+                style="padding: 10px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="font-size: 20px; font-weight: bold; color: #28a745;">{{ performance_stats.high_correct }}
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">✓ 正確率 ≥80%</div>
+            </div>
+
+            <div
+                style="padding: 10px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="font-size: 20px; font-weight: bold; color: #dc3545;">{{ performance_stats.low_correct }}
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">✗ 正確率 &lt;30%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}
