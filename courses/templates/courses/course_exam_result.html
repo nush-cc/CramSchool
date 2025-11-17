@@ -3,364 +3,357 @@
 {% block title %}測驗結果 - {{ course.title }} - CramSchool{% endblock %}
 
 {% block page_title %}
-    <i class="bi bi-trophy text-warning"></i> 測驗結果
+<i class="bi bi-trophy text-warning"></i> 測驗結果
 {% endblock %}
 
 {% block page_subtitle %}{{ course.title }} - {{ course.grade }}{% endblock %}
 
 {% block content %}
-    <div class="exam-result-container">
-        <!-- 成績卡片 -->
-        <div class="card mb-4 border-0 shadow-lg">
-            <div class="card-body text-center py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="score-circle mx-auto mb-4">
-                    <div class="score-value">{{ score }}</div>
-                    <div class="score-label">分</div>
-                </div>
-                <h3 class="text-white mb-3">
-                    {% if score >= 90 %}
-                        🎉 太棒了！
-                    {% elif score >= 70 %}
-                        👍 做得不錯！
-                    {% elif score >= 60 %}
-                        💪 繼續努力！
-                    {% else %}
-                        📚 再接再厲！
-                    {% endif %}
-                </h3>
-                <p class="text-white mb-0 opacity-90">
-                    答對 {{ correct_count }} 題，共 {{ total_questions }} 題
-                </p>
+<div class="exam-result-container">
+    <!-- 成績卡片 -->
+    <div class="card mb-4 border-0 shadow-lg">
+        <div class="card-body text-center py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="score-circle mx-auto mb-4">
+                <div class="score-value">{{ score }}</div>
+                <div class="score-label">分</div>
             </div>
+            <h3 class="text-white mb-3">
+                {% if score >= 90 %}
+                🎉 太棒了！
+                {% elif score >= 70 %}
+                👍 做得不錯！
+                {% elif score >= 60 %}
+                💪 繼續努力！
+                {% else %}
+                📚 再接再厲！
+                {% endif %}
+            </h3>
+            <p class="text-white mb-0 opacity-90">
+                答對 {{ correct_count }} 題，共 {{ total_questions }} 題
+            </p>
         </div>
+    </div>
 
-        <!-- 統計卡片 -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-check-circle text-success fs-1 mb-2"></i>
-                        <h4 class="text-success mb-1">{{ correct_count }}</h4>
-                        <small class="text-muted">答對題數</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-x-circle text-danger fs-1 mb-2"></i>
-                        <h4 class="text-danger mb-1">{{ total_questions|add:correct_count|add:"-"|add:correct_count|add:correct_count }}</h4>
-                        <small class="text-muted">答錯題數</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card text-center border-0 shadow-sm">
-                    <div class="card-body">
-                        <i class="bi bi-percent text-info fs-1 mb-2"></i>
-                        <h4 class="text-info mb-1">{{ score }}%</h4>
-                        <small class="text-muted">正確率</small>
-                    </div>
+    <!-- 統計卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-check-circle text-success fs-1 mb-2"></i>
+                    <h4 class="text-success mb-1">{{ correct_count }}</h4>
+                    <small class="text-muted">答對題數</small>
                 </div>
             </div>
         </div>
-
-        <!-- 題目詳解 -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-journal-text"></i> 詳細解析
-                </h5>
-            </div>
-            <div class="card-body p-0">
-                {% for result in results %}
-                    <div class="result-item {% if result.is_correct %}result-correct{% else %}result-incorrect{% endif %}">
-                        <!-- 題目標題 -->
-                        <div class="result-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="badge bg-primary me-2">第 {{ forloop.counter }} 題</span>
-                                    <span class="badge bg-secondary">{{ result.question.get_difficulty_display }}</span>
-                                    {% if result.is_correct %}
-                                        <span class="badge bg-success ms-2">
-                                    <i class="bi bi-check-circle"></i> 答對了
-                                </span>
-                                    {% else %}
-                                        <span class="badge bg-danger ms-2">
-                                    <i class="bi bi-x-circle"></i> 答錯了
-                                </span>
-                                    {% endif %}
-                                </div>
-                                <span class="badge bg-info">{{ result.question.question_type.name }}</span>
-                            </div>
-                        </div>
-
-                        <!-- 題目內容 -->
-                        <div class="result-content">
-                            <div class="question-text mb-3">
-                                <strong>題目：</strong>
-                                <p class="mb-0 mt-2" style="white-space: pre-line;">{{ result.question.content }}</p>
-                            </div>
-
-                            <!-- 選項列表 -->
-                            <div class="choices-list mb-3">
-                                {% for choice in result.question.choices.all %}
-                                    <div class="choice-display {% if choice.is_correct %}choice-correct{% elif result.user_choice and choice.id == result.user_choice.id %}choice-wrong{% endif %}">
-                                        <div class="d-flex align-items-start gap-3">
-                                            <span class="choice-letter-display">{{ choice.order|add:64|stringformat:"c" }}</span>
-                                            <div class="flex-grow-1">
-                                                <div class="choice-text-display">{{ choice.content }}</div>
-                                                {% if choice.is_correct %}
-                                                    <span class="badge bg-success mt-2">
-                                            <i class="bi bi-check-lg"></i> 正確答案
-                                        </span>
-                                                {% elif result.user_choice and choice.id == result.user_choice.id %}
-                                                    <span class="badge bg-danger mt-2">
-                                            <i class="bi bi-x-lg"></i> 你的答案
-                                        </span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-
-                            <!-- 詳解 -->
-                            {% if result.question.explanation %}
-                                <div class="explanation-box">
-                                    <div class="explanation-header">
-                                        <i class="bi bi-lightbulb"></i> 詳細解析
-                                    </div>
-                                    <div class="explanation-content" style="white-space: pre-line;">
-                                        {{ result.question.explanation }}
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- 操作按鈕 -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center py-4">
-                <div class="d-flex gap-3 justify-content-center flex-wrap">
-                    <a href="{% url 'course_exam' course.pk %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-arrow-repeat"></i> 再測驗一次
-                    </a>
-                    <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-arrow-left"></i> 返回課程
-                    </a>
-                    <button onclick="window.print()" class="btn btn-outline-info btn-lg">
-                        <i class="bi bi-printer"></i> 列印結果
-                    </button>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-percent text-info fs-1 mb-2"></i>
+                    <h4 class="text-info mb-1">{{ score }}%</h4>
+                    <small class="text-muted">正確率</small>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- 題目詳解 -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-journal-text"></i> 詳細解析
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% for result in results %}
+            <div class="result-item {% if result.is_correct %}result-correct{% else %}result-incorrect{% endif %}">
+                <!-- 題目標題 -->
+                <div class="result-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-primary me-2">第 {{ forloop.counter }} 題</span>
+                            <span class="badge bg-secondary">{{ result.question.get_difficulty_display }}</span>
+                            {% if result.is_correct %}
+                            <span class="badge bg-success ms-2">
+                                <i class="bi bi-check-circle"></i> 答對了
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger ms-2">
+                                <i class="bi bi-x-circle"></i> 答錯了
+                            </span>
+                            {% endif %}
+                        </div>
+                        <span class="badge bg-info">{{ result.question.question_type.name }}</span>
+                    </div>
+                </div>
+
+                <!-- 題目內容 -->
+                <div class="result-content">
+                    <div class="question-text mb-3">
+                        <strong>題目：</strong>
+                        <p class="mb-0 mt-2" style="white-space: pre-line;">{{ result.question.content }}</p>
+                    </div>
+
+                    <!-- 選項列表 -->
+                    <div class="choices-list mb-3">
+                        {% for choice in result.question.choices.all %}
+                        <div
+                            class="choice-display {% if choice.is_correct %}choice-correct{% elif result.user_choice and choice.id == result.user_choice.id %}choice-wrong{% endif %}">
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="choice-letter-display">{{ choice.order|add:64|stringformat:"c" }}</span>
+                                <div class="flex-grow-1">
+                                    <div class="choice-text-display">{{ choice.content }}</div>
+                                    {% if choice.is_correct %}
+                                    <span class="badge bg-success mt-2">
+                                        <i class="bi bi-check-lg"></i> 正確答案
+                                    </span>
+                                    {% elif result.user_choice and choice.id == result.user_choice.id %}
+                                    <span class="badge bg-danger mt-2">
+                                        <i class="bi bi-x-lg"></i> 你的答案
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- 詳解 -->
+                    {% if result.question.explanation %}
+                    <div class="explanation-box">
+                        <div class="explanation-header">
+                            <i class="bi bi-lightbulb"></i> 詳細解析
+                        </div>
+                        <div class="explanation-content" style="white-space: pre-line;">
+                            {{ result.question.explanation }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-4">
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'courses:course_exam' course.pk %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-repeat"></i> 再測驗一次
+                </a>
+                <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-arrow-left"></i> 返回課程
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-info btn-lg">
+                    <i class="bi bi-printer"></i> 列印結果
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}
-    <style>
-        /* 結果容器 */
-        .exam-result-container {
-            max-width: 900px;
-            margin: 0 auto;
+<style>
+    /* 結果容器 */
+    .exam-result-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* 成績圓圈 */
+    .score-circle {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .score-value {
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .score-label {
+        font-size: 1.2rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    /* 結果項目 */
+    .result-item {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 2rem;
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-correct {
+        background: #f0fdf4;
+        border-left: 4px solid #10b981;
+    }
+
+    .result-incorrect {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+    }
+
+    .result-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .result-content {
+        padding-left: 1rem;
+    }
+
+    .question-text {
+        padding: 1rem;
+        background: white;
+        border-radius: 0.5rem;
+        border-left: 3px solid #3b82f6;
+    }
+
+    /* 選項顯示 */
+    .choices-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .choice-display {
+        padding: 1rem;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .choice-correct {
+        background: #f0fdf4;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .choice-wrong {
+        background: #fef2f2;
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .choice-letter-display {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: #3b82f6;
+        color: white;
+        border-radius: 50%;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .choice-correct .choice-letter-display {
+        background: #10b981;
+    }
+
+    .choice-wrong .choice-letter-display {
+        background: #ef4444;
+    }
+
+    .choice-text-display {
+        font-size: 1rem;
+        line-height: 1.8;
+    }
+
+    /* 詳解框 */
+    .explanation-box {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: #fffbeb;
+        border: 2px solid #fbbf24;
+        border-radius: 0.5rem;
+    }
+
+    .explanation-header {
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .explanation-content {
+        color: #78350f;
+        line-height: 1.8;
+    }
+
+    /* 列印樣式 */
+    @media print {
+
+        .navbar-custom,
+        .sidebar,
+        .page-header,
+        .card-footer,
+        .btn {
+            display: none !important;
         }
 
-        /* 成績圓圈 */
+        .main-wrapper {
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        .result-item {
+            page-break-inside: avoid;
+        }
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
         .score-circle {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            width: 150px;
+            height: 150px;
         }
 
         .score-value {
-            font-size: 3.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
+            font-size: 2.5rem;
         }
 
-        .score-label {
-            font-size: 1.2rem;
-            color: #6b7280;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-
-        /* 結果項目 */
         .result-item {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 2rem;
+            padding: 1.5rem 1rem;
         }
-
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
-        .result-correct {
-            background: #f0fdf4;
-            border-left: 4px solid #10b981;
-        }
-
-        .result-incorrect {
-            background: #fef2f2;
-            border-left: 4px solid #ef4444;
-        }
-
-        .result-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .result-content {
-            padding-left: 1rem;
-        }
-
-        .question-text {
-            padding: 1rem;
-            background: white;
-            border-radius: 0.5rem;
-            border-left: 3px solid #3b82f6;
-        }
-
-        /* 選項顯示 */
-        .choices-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .choice-display {
-            padding: 1rem;
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 0.5rem;
-            transition: all 0.3s;
-        }
-
-        .choice-correct {
-            background: #f0fdf4;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        .choice-wrong {
-            background: #fef2f2;
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-        }
-
-        .choice-letter-display {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: #3b82f6;
-            color: white;
-            border-radius: 50%;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .choice-correct .choice-letter-display {
-            background: #10b981;
-        }
-
-        .choice-wrong .choice-letter-display {
-            background: #ef4444;
-        }
-
-        .choice-text-display {
-            font-size: 1rem;
-            line-height: 1.8;
-        }
-
-        /* 詳解框 */
-        .explanation-box {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: #fffbeb;
-            border: 2px solid #fbbf24;
-            border-radius: 0.5rem;
-        }
-
-        .explanation-header {
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .explanation-content {
-            color: #78350f;
-            line-height: 1.8;
-        }
-
-        /* 列印樣式 */
-        @media print {
-            .navbar-custom,
-            .sidebar,
-            .page-header,
-            .card-footer,
-            .btn {
-                display: none !important;
-            }
-
-            .main-wrapper {
-                margin-left: 0 !important;
-                margin-top: 0 !important;
-            }
-
-            .result-item {
-                page-break-inside: avoid;
-            }
-        }
-
-        /* 響應式設計 */
-        @media (max-width: 768px) {
-            .score-circle {
-                width: 150px;
-                height: 150px;
-            }
-
-            .score-value {
-                font-size: 2.5rem;
-            }
-
-            .result-item {
-                padding: 1.5rem 1rem;
-            }
-        }
-    </style>
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // 平滑滾動到錯誤題目
-        document.addEventListener('DOMContentLoaded', function() {
-            const incorrectItems = document.querySelectorAll('.result-incorrect');
-            if (incorrectItems.length > 0) {
-                // 可選：滾動到第一題錯誤的題目
-                // incorrectItems[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
+<script>
+    // 平滑滾動到錯誤題目
+    document.addEventListener('DOMContentLoaded', function () {
+        const incorrectItems = document.querySelectorAll('.result-incorrect');
+        if (incorrectItems.length > 0) {
+            // 可選：滾動到第一題錯誤的題目
+            // incorrectItems[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
 
-        // 慶祝動畫（如果滿分）
-        {% if score == 100 %}
-            // 可以在這裡添加慶祝動畫效果
-            console.log('🎉 恭喜滿分！');
-        {% endif %}
-    </script>
+    // 慶祝動畫（如果滿分）
+    {% if score == 100 %}
+    // 可以在這裡添加慶祝動畫效果
+    console.log('🎉 恭喜滿分！');
+    {% endif %}
+</script>
 {% endblock %}

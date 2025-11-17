@@ -483,29 +483,29 @@
                 </a>
             </li>
             <li class="sidebar-menu-item">
-                <a href="{% url 'course_list' %}" class="sidebar-menu-link">
+                <a href="{% url 'courses:placement_test' %}" class="sidebar-menu-link">
+                    <i class="bi bi-pencil-square"></i>
+                    <span class="menu-text">預先測驗</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'courses:course_list' %}" class="sidebar-menu-link">
                     <i class="bi bi-book"></i>
                     <span class="menu-text">課程</span>
                 </a>
             </li>
             <li class="sidebar-menu-item">
-                <a href="/assessments/" class="sidebar-menu-link">
-                    <i class="bi bi-pencil-square"></i>
-                    <span class="menu-text">試卷</span>
-                </a>
-            </li>
-            <li class="sidebar-menu-item">
-                <a href="/enrollments/" class="sidebar-menu-link">
+                <a href="{% url 'enrollments:enrollment_list' %}" class="sidebar-menu-link">
                     <i class="bi bi-file-earmark-text"></i>
                     <span class="menu-text">報名</span>
                 </a>
             </li>
-            <li class="sidebar-menu-item">
+            {% comment %} <li class="sidebar-menu-item">
                 <a href="/users/" class="sidebar-menu-link">
                     <i class="bi bi-people"></i>
                     <span class="menu-text">使用者</span>
                 </a>
-            </li>
+            </li> {% endcomment %}
         </ul>
     </aside>
 {% endif %}

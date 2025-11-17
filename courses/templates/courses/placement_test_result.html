@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}預先測驗結果 - CramSchool{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-check-circle text-success"></i> 預先測驗完成
+{% endblock %}
+
+{% block page_subtitle %}感謝您完成分班測驗{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <div class="card mb-4 border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-clipboard-check"></i> 分班結果
+            </h5>
+        </div>
+        <div class="card-body text-center py-5">
+            <h2 class="mb-4">{{ course.title }}</h2>
+
+            <div class="score-display mb-5">
+                <div class="score-circle">
+                    <span class="score-number">{{ score|floatformat:1 }}</span>
+                    <span class="score-percent">%</span>
+                </div>
+            </div>
+
+            <!-- 等級顯示 -->
+            <div class="level-badge mb-5">
+                <h3>您被分配到</h3>
+                <div class="level-display">
+                    {% if level == 'A' %}
+                    <span class="badge-large badge-level-a">A 組</span>
+                    <p class="text-muted mt-3">恭喜！您的成績優異，被分配到 A 組。</p>
+                    {% elif level == 'B' %}
+                    <span class="badge-large badge-level-b">B 組</span>
+                    <p class="text-muted mt-3">您被分配到 B 組，保持努力進步！</p>
+                    {% else %}
+                    <span class="badge-large badge-level-c">C 組</span>
+                    <p class="text-muted mt-3">您被分配到 C 組，建議多加練習。</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-12 mb-3">
+                    <div class="result-stat">
+                        <p class="text-muted mb-2">答對題數</p>
+                        <h4 class="text-success">{{ correct_answers }} / {{ total_questions }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'courses:course_list' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-book"></i> 查看課程
+                </a>
+                <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-house"></i> 返回首頁
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分級說明 -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="bi bi-info-circle"></i> 分級說明
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <div class="level-info">
+                        <h4 class="badge-level-a mb-2">A 組</h4>
+                        <p class="text-muted">85 分以上</p>
+                        <p>高級課程內容</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <div class="level-info">
+                        <h4 class="badge-level-b mb-2">B 組</h4>
+                        <p class="text-muted">70-84 分</p>
+                        <p>中級課程內容</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="level-info">
+                        <h4 class="badge-level-c mb-2">C 組</h4>
+                        <p class="text-muted">69 分以下</p>
+                        <p>基礎課程內容</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .score-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        margin: 0 auto;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    }
+
+    .score-number {
+        font-size: 4rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .score-percent {
+        font-size: 1.5rem;
+        color: white;
+        margin-left: 0.5rem;
+    }
+
+    .level-display {
+        margin: 2rem 0;
+    }
+
+    .badge-large {
+        display: inline-block;
+        padding: 1rem 2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        border-radius: 0.5rem;
+        color: white;
+    }
+
+    .badge-level-a {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    .badge-level-b {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .badge-level-c {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .result-stat {
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+        border-left: 4px solid #10b981;
+    }
+
+    .level-info {
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 0.5rem;
+    }
+
+    .level-info h4 {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .score-circle {
+            width: 150px;
+            height: 150px;
+        }
+
+        .score-number {
+            font-size: 2.5rem;
+        }
+
+        .score-percent {
+            font-size: 1rem;
+        }
+
+        .badge-large {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,216 @@
+{# enrollments/templates/enrollments/enrollment_list.html #}
+{% extends 'base.html' %}
+
+{% block title %}選課系統 - CramSchool{% endblock %}
+
+{% block page_title %}
+    <i class="bi bi-mortarboard text-primary"></i> 選課系統
+{% endblock %}
+
+{% block page_subtitle %}選擇您想要學習的課程{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <!-- 快速連結 -->
+        <div class="mb-4">
+            <a href="{% url 'courses:course_list' %}" class="btn btn-info">
+                <i class="bi bi-bookmark"></i> 我的課程
+            </a>
+        </div>
+
+        <!-- 課程分組列表 -->
+        {% if grouped_courses %}
+            {% for group in grouped_courses %}
+                <div class="card mb-4">
+                    <!-- 分組標題 -->
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-folder"></i> {{ group.key }}
+                            </h5>
+                            <div>
+                                {% if group.data.approved_count > 0 %}
+                                    <span class="badge bg-success me-2">
+                                        <i class="bi bi-check-circle"></i> 已選 {{ group.data.approved_count }} 門
+                                    </span>
+                                {% endif %}
+                                {% if group.data.pending_count > 0 %}
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-hourglass-split"></i> 待審核 {{ group.data.pending_count }} 門
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 課程清單 -->
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                <tr>
+                                    <th>課程名稱</th>
+                                    <th>教師</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for course in group.data.courses %}
+                                    <tr>
+                                        <!-- 課程名稱 -->
+                                        <td>
+                                            <strong>{{ course.title }}</strong>
+                                            {% if course.description %}
+                                                <br>
+                                                <small class="text-muted">{{ course.description|truncatewords:15 }}</small>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- 教師 -->
+                                        <td>
+                                            {% if course.teacher %}
+                                                {{ course.teacher.username }}
+                                            {% else %}
+                                                <span class="text-muted">未指定</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- 狀態 -->
+                                        <td>
+                                            {% if course.enrollment_status == 'approved' %}
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle"></i> 已選
+                                                </span>
+                                            {% elif course.enrollment_status == 'pending' %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-hourglass-split"></i> 待審核
+                                                </span>
+                                            {% elif course.enrollment_status == 'rejected' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-x-circle"></i> 已拒絕
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">未選</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- 操作按鈕 -->
+                                        <td>
+                                            {% if course.enrollment_status == 'approved' %}
+                                                <!-- 已選 - 可退選 -->
+                                                <a href="{% url 'courses:course_detail' course.pk %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> 查看
+                                                </a>
+                                            {% elif course.enrollment_status == 'pending' %}
+                                                <!-- 待審核 - 不能操作 -->
+                                                <button class="btn btn-sm btn-secondary" disabled>
+                                                    <i class="bi bi-hourglass-split"></i> 審核中
+                                                </button>
+                                            {% elif course.enrollment_status == 'rejected' %}
+                                                <!-- 已拒絕 - 可重新申請 -->
+                                                <form method="post" action="{% url 'enrollments:enroll_course' course.pk %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-plus-circle"></i> 重新申請
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <!-- 未選 - 可申請 -->
+                                                <form method="post" action="{% url 'enrollments:enroll_course' course.pk %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-plus-circle"></i> 申請選課
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <!-- 無課程提示 -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">目前沒有可選課程</h5>
+                    <p class="text-muted">系統中暫無可選課程，請稍後再試。</p>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- 未登入提示 -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-lock display-1 text-muted mb-3"></i>
+                <h5 class="text-muted">請先登入</h5>
+                <p class="text-muted mb-3">您需要登入才能使用選課系統。</p>
+                <a href="{% url 'login' %}" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-in-right"></i> 登入
+                </a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: #f9fafb;
+            transition: background-color 0.2s ease;
+        }
+
+        .badge {
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            border-bottom: 2px solid #f3f4f6;
+            padding: 1.25rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .table {
+                font-size: 0.875rem;
+            }
+
+            .btn-sm {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .badge {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+{% endblock %}

@@ -1,295 +1,285 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if form.instance.pk %}編輯課程{% else %}新增課程{% endif %} - CramSchool
+{% if form.instance.pk %}編輯課程{% else %}新增課程{% endif %} - CramSchool
 {% endblock %}
 
 {% block page_title %}
-    {% if form.instance.pk %}
-        <i class="bi bi-pencil"></i> 編輯課程
-    {% else %}
-        <i class="bi bi-plus-circle"></i> 新增課程
-    {% endif %}
+{% if form.instance.pk %}
+<i class="bi bi-pencil"></i> 編輯課程
+{% else %}
+<i class="bi bi-plus-circle"></i> 新增課程
+{% endif %}
 {% endblock %}
 
 {% block page_subtitle %}
-    {% if form.instance.pk %}
-        修改課程資訊
-    {% else %}
-        建立一個新的課程
-    {% endif %}
+{% if form.instance.pk %}
+修改課程資訊
+{% else %}
+建立一個新的課程
+{% endif %}
 {% endblock %}
 
 {% block content %}
-    <!-- 返回按鈕 -->
-    <div class="mb-4">
-        {% if form.instance.pk %}
-            <a href="{% url 'course_detail' form.instance.pk %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> 返回課程詳情
-            </a>
-        {% else %}
-            <a href="{% url 'course_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> 返回課程列表
-            </a>
-        {% endif %}
+<!-- 返回按鈕 -->
+<div class="mb-4">
+    {% if form.instance.pk %}
+    <a href="{% url 'courses:course_detail' form.instance.pk %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> 返回課程詳情
+    </a>
+    {% else %}
+    <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> 返回課程列表
+    </a>
+    {% endif %}
+</div>
+
+<!-- 表單 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-file-earmark-text"></i> 課程資訊
+        </h5>
     </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
 
-    <!-- 表單 -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="bi bi-file-earmark-text"></i> 課程資訊
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="post" novalidate>
-                {% csrf_token %}
+            <!-- 顯示非欄位錯誤 -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-                <!-- 顯示非欄位錯誤 -->
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        {% for error in form.non_field_errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                    </div>
+            <!-- 課程標題 -->
+            <div class="mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">
+                    課程標題 <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+                    id="{{ form.title.id_for_label }}" name="{{ form.title.name }}"
+                    value="{{ form.title.value|default:'' }}" required placeholder="請輸入課程標題">
+                {% if form.title.help_text %}
+                <div class="form-text">{{ form.title.help_text }}</div>
                 {% endif %}
-
-                <!-- 課程標題 -->
-                <div class="mb-3">
-                    <label for="{{ form.title.id_for_label }}" class="form-label">
-                        課程標題 <span class="text-danger">*</span>
-                    </label>
-                    <input type="text"
-                           class="form-control {% if form.title.errors %}is-invalid{% endif %}"
-                           id="{{ form.title.id_for_label }}"
-                           name="{{ form.title.name }}"
-                           value="{{ form.title.value|default:'' }}"
-                           required
-                           placeholder="請輸入課程標題">
-                    {% if form.title.help_text %}
-                        <div class="form-text">{{ form.title.help_text }}</div>
-                    {% endif %}
-                    {% if form.title.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.title.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                {% if form.title.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.title.errors %}
+                    {{ error }}
+                    {% endfor %}
                 </div>
+                {% endif %}
+            </div>
 
-                <div class="row">
-                    <!-- 科目 -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.subject.id_for_label }}" class="form-label">
-                            科目 <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select {% if form.subject.errors %}is-invalid{% endif %}"
-                                id="{{ form.subject.id_for_label }}"
-                                name="{{ form.subject.name }}"
-                                required>
-                            <option value="">請選擇科目</option>
-                            {% for subject in subjects %}
-                                <option value="{{ subject.id }}">{{ subject.name }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if form.subject.help_text %}
-                            <div class="form-text">{{ form.subject.help_text }}</div>
-                        {% endif %}
-                        {% if form.subject.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.subject.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- 年級 -->
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.grade.id_for_label }}" class="form-label">
-                            年級 <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select {% if form.grade.errors %}is-invalid{% endif %}"
-                                id="{{ form.grade.id_for_label }}"
-                                name="{{ form.grade.name }}"
-                                required>
-                            <option value="">請選擇年級</option>
-                            {% for grade in grades %}
-                                <option value="{{ grade.id }}">{{ grade }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if form.grade.help_text %}
-                            <div class="form-text">{{ form.grade.help_text }}</div>
-                        {% endif %}
-                        {% if form.grade.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.grade.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- 授課教師 -->
-                <div class="mb-3">
-                    <label for="{{ form.teacher.id_for_label }}" class="form-label">
-                        授課教師
+            <div class="row">
+                <!-- 科目 -->
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.subject.id_for_label }}" class="form-label">
+                        科目 <span class="text-danger">*</span>
                     </label>
-                    <select class="form-select {% if form.teacher.errors %}is-invalid{% endif %}"
-                            id="{{ form.teacher.id_for_label }}"
-                            name="{{ form.teacher.name }}">
-                        <option value="">請選擇教師（如為空則自動設定）</option>
-                        {% for teacher in teachers %}
-                            <option value="{{ teacher.id }}">
-                                {{ teacher.username }}
-                                {% if teacher.role %}
-                                    ({{ teacher.get_role_display }})
-                                {% endif %}
-                            </option>
+                    <select class="form-select {% if form.subject.errors %}is-invalid{% endif %}"
+                        id="{{ form.subject.id_for_label }}" name="{{ form.subject.name }}" required>
+                        <option value="">請選擇科目</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.name }}</option>
                         {% endfor %}
                     </select>
-                    <div class="form-text">
-                        <i class="bi bi-info-circle"></i>
-                        如果不指定教師,系統將自動將當前登入的教師設定為授課教師。
+                    {% if form.subject.help_text %}
+                    <div class="form-text">{{ form.subject.help_text }}</div>
+                    {% endif %}
+                    {% if form.subject.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.subject.errors %}
+                        {{ error }}
+                        {% endfor %}
                     </div>
-                    {% if form.teacher.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.teacher.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
                     {% endif %}
                 </div>
 
-                <!-- 課程描述 -->
-                <div class="mb-3">
-                    <label for="{{ form.description.id_for_label }}" class="form-label">
-                        課程描述
+                <!-- 年級 -->
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.grade.id_for_label }}" class="form-label">
+                        年級 <span class="text-danger">*</span>
                     </label>
-                    <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}"
-                              id="{{ form.description.id_for_label }}"
-                              name="{{ form.description.name }}"
-                              rows="6"
-                              placeholder="請輸入課程的詳細描述...">{{ form.description.value|default:'' }}</textarea>
-                    {% if form.description.help_text %}
-                        <div class="form-text">{{ form.description.help_text }}</div>
+                    <select class="form-select {% if form.grade.errors %}is-invalid{% endif %}"
+                        id="{{ form.grade.id_for_label }}" name="{{ form.grade.name }}" required>
+                        <option value="">請選擇年級</option>
+                        {% for grade in grades %}
+                        <option value="{{ grade.id }}">{{ grade }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.grade.help_text %}
+                    <div class="form-text">{{ form.grade.help_text }}</div>
                     {% endif %}
-                    {% if form.description.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in form.description.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- 啟用狀態 -->
-                <div class="mb-4">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}"
-                               type="checkbox"
-                               role="switch"
-                               id="{{ form.is_active.id_for_label }}"
-                               name="{{ form.is_active.name }}"
-                               {% if form.is_active.value or form.is_active.value == None %}checked{% endif %}>
-                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                            啟用此課程
-                        </label>
-                        {% if form.is_active.help_text %}
-                            <div class="form-text">{{ form.is_active.help_text }}</div>
-                        {% endif %}
-                        {% if form.is_active.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.is_active.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                    {% if form.grade.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.grade.errors %}
+                        {{ error }}
+                        {% endfor %}
                     </div>
-                </div>
-
-                <!-- 提交按鈕 -->
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i>
-                        {% if form.instance.pk %}
-                            儲存變更
-                        {% else %}
-                            建立課程
-                        {% endif %}
-                    </button>
-                    {% if form.instance.pk %}
-                        <a href="{% url 'course_detail' form.instance.pk %}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> 取消
-                        </a>
-                    {% else %}
-                        <a href="{% url 'course_list' %}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> 取消
-                        </a>
                     {% endif %}
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- 提示卡片 -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <h6 class="card-title">
-                <i class="bi bi-lightbulb text-warning"></i> 填寫提示
-            </h6>
-            <ul class="mb-0 small text-muted">
-                <li>課程標題、科目和年級為必填欄位</li>
-                <li>如果您是教師且沒有選擇授課教師,系統會自動將您設定為授課教師</li>
-                <li>課程描述可以詳細說明課程內容、教學目標等資訊</li>
-                <li>未啟用的課程將不會在課程列表中顯示</li>
-            </ul>
-        </div>
+            <!-- 授課教師 -->
+            <div class="mb-3">
+                <label for="{{ form.teacher.id_for_label }}" class="form-label">
+                    授課教師
+                </label>
+                <select class="form-select {% if form.teacher.errors %}is-invalid{% endif %}"
+                    id="{{ form.teacher.id_for_label }}" name="{{ form.teacher.name }}">
+                    <option value="">請選擇教師（如為空則自動設定）</option>
+                    {% for teacher in teachers %}
+                    <option value="{{ teacher.id }}">
+                        {{ teacher.username }}
+                        {% if teacher.role %}
+                        ({{ teacher.get_role_display }})
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">
+                    <i class="bi bi-info-circle"></i>
+                    如果不指定教師,系統將自動將當前登入的教師設定為授課教師。
+                </div>
+                {% if form.teacher.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.teacher.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 課程描述 -->
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">
+                    課程描述
+                </label>
+                <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                    id="{{ form.description.id_for_label }}" name="{{ form.description.name }}" rows="6"
+                    placeholder="請輸入課程的詳細描述...">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.help_text %}
+                <div class="form-text">{{ form.description.help_text }}</div>
+                {% endif %}
+                {% if form.description.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.description.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 啟用狀態 -->
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    {% if form.is_active.value %}
+                    <input class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}" type="checkbox"
+                        role="switch" id="{{ form.is_active.id_for_label }}" name="{{ form.is_active.name }}" checked>
+                    {% else %}
+                    <input class="form-check-input {% if form.is_active.errors %}is-invalid{% endif %}" type="checkbox"
+                        role="switch" id="{{ form.is_active.id_for_label }}" name="{{ form.is_active.name }}">
+                    {% endif %}
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                        啟用此課程
+                    </label>
+                    {% if form.is_active.help_text %}
+                    <div class="form-text">{{ form.is_active.help_text }}</div>
+                    {% endif %}
+                    {% if form.is_active.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.is_active.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 提交按鈕 -->
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i>
+                    {% if form.instance.pk %}
+                    儲存變更
+                    {% else %}
+                    建立課程
+                    {% endif %}
+                </button>
+                {% if form.instance.pk %}
+                <a href="{% url 'courses:course_detail' form.instance.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> 取消
+                </a>
+                {% else %}
+                <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> 取消
+                </a>
+                {% endif %}
+            </div>
+        </form>
     </div>
+</div>
+
+<!-- 提示卡片 -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h6 class="card-title">
+            <i class="bi bi-lightbulb text-warning"></i> 填寫提示
+        </h6>
+        <ul class="mb-0 small text-muted">
+            <li>課程標題、科目和年級為必填欄位</li>
+            <li>如果您是教師且沒有選擇授課教師,系統會自動將您設定為授課教師</li>
+            <li>課程描述可以詳細說明課程內容、教學目標等資訊</li>
+            <li>未啟用的課程將不會在課程列表中顯示</li>
+        </ul>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // 表單驗證
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('form[novalidate]')
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
+<script>
+    // 表單驗證
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('form[novalidate]')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 
-        // 設置選中狀態
-        document.addEventListener('DOMContentLoaded', function() {
-            // 設置科目選中狀態
-            const subjectValue = '{{ form.subject.value|default:"" }}';
-            if (subjectValue) {
-                const subjectSelect = document.getElementById('{{ form.subject.id_for_label }}');
-                subjectSelect.value = subjectValue;
-            }
+    // 設置選中狀態
+    document.addEventListener('DOMContentLoaded', function () {
+        // 設置科目選中狀態
+        const subjectValue = '{{ form.subject.value|default:"" }}';
+        if (subjectValue) {
+            const subjectSelect = document.getElementById('{{ form.subject.id_for_label }}');
+            subjectSelect.value = subjectValue;
+        }
 
-            // 設置年級選中狀態
-            const gradeValue = '{{ form.grade.value|default:"" }}';
-            if (gradeValue) {
-                const gradeSelect = document.getElementById('{{ form.grade.id_for_label }}');
-                gradeSelect.value = gradeValue;
-            }
+        // 設置年級選中狀態
+        const gradeValue = '{{ form.grade.value|default:"" }}';
+        if (gradeValue) {
+            const gradeSelect = document.getElementById('{{ form.grade.id_for_label }}');
+            gradeSelect.value = gradeValue;
+        }
 
-            // 設置教師選中狀態
-            const teacherValue = '{{ form.teacher.value|default:"" }}';
-            if (teacherValue) {
-                const teacherSelect = document.getElementById('{{ form.teacher.id_for_label }}');
-                teacherSelect.value = teacherValue;
-            }
-        });
-    </script>
+        // 設置教師選中狀態
+        const teacherValue = '{{ form.teacher.value|default:"" }}';
+        if (teacherValue) {
+            const teacherSelect = document.getElementById('{{ form.teacher.id_for_label }}');
+            teacherSelect.value = teacherValue;
+        }
+    });
+</script>
 {% endblock %}

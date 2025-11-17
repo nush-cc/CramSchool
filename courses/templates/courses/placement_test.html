@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}課程測驗 - {{ course.title }} - CramSchool{% endblock %}
+{% block title %}預先測驗 - {{ course.title }} - CramSchool{% endblock %}
 
 {% block page_title %}
-    <i class="bi bi-clipboard-check text-success"></i> 課程測驗
+    <i class="bi bi-clipboard-check text-warning"></i> 預先測驗
 {% endblock %}
 
 {% block page_subtitle %}{{ course.title }} - {{ course.grade }}{% endblock %}
@@ -11,22 +11,22 @@
 {% block content %}
     <div class="exam-container">
         <!-- 考試資訊卡片 -->
-        <div class="card mb-4 border-success">
-            <div class="card-header bg-success text-white">
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-dark">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-info-circle"></i> 測驗資訊
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-info-circle text-white"></i> 預先測驗資訊
                     </h5>
-                    <span class="badge bg-light text-success">
-                    共 {{ total_questions }} 題
-                </span>
+                    <span class="badge bg-light text-warning">
+                        共 {{ total_questions }} 題
+                    </span>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 mb-3 mb-md-0">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-journal-text text-success fs-4 me-3"></i>
+                            <i class="bi bi-journal-text text-warning fs-4 me-3"></i>
                             <div>
                                 <small class="text-muted d-block">科目</small>
                                 <strong>{{ course.subject.name }}</strong>
@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-list-ol text-success fs-4 me-3"></i>
+                            <i class="bi bi-list-ol text-warning fs-4 me-3"></i>
                             <div>
                                 <small class="text-muted d-block">題數</small>
                                 <strong>{{ total_questions }} 題</strong>
@@ -44,7 +44,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-clock text-success fs-4 me-3"></i>
+                            <i class="bi bi-clock text-warning fs-4 me-3"></i>
                             <div>
                                 <small class="text-muted d-block">計時</small>
                                 <strong id="timer">00:00</strong>
@@ -56,7 +56,7 @@
         </div>
 
         <!-- 考試表單 -->
-        <form method="post" action="{% url 'courses:course_exam_submit' course.pk %}" id="examForm">
+        <form method="post" action="{% url 'courses:placement_test_submit' %}" id="examForm">
             {% csrf_token %}
 
             <!-- 題目列表 -->
@@ -65,10 +65,10 @@
                     <div class="card-header bg-light">
                         <div class="d-flex justify-content-between align-items-start">
                             <h5 class="mb-0">
-                                <span class="badge bg-primary me-2">{{ question.exam_number }}</span>
+                                <span class="badge bg-warning me-2">{{ question.exam_number }}</span>
                                 <span class="badge bg-secondary">
-                            {{ question.get_difficulty_display }}
-                        </span>
+                                    {{ question.get_difficulty_display }}
+                                </span>
                             </h5>
                             <span class="badge bg-info">{{ question.question_type.name }}</span>
                         </div>
@@ -104,17 +104,17 @@
             {% endfor %}
 
             <!-- 提交區域 -->
-            <div class="card border-success">
+            <div class="card border-warning">
                 <div class="card-body text-center py-4">
                     <h5 class="mb-3">
-                        <i class="bi bi-check-circle text-success"></i> 確認要提交考卷嗎？
+                        <i class="bi bi-check-circle text-warning"></i> 確認要提交預先測驗嗎？
                     </h5>
                     <p class="text-muted mb-4">
                         請確認所有題目都已作答，提交後將無法修改答案。
                     </p>
                     <div class="d-flex gap-3 justify-content-center">
-                        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
-                            <i class="bi bi-send-fill"></i> 提交考卷
+                        <button type="submit" class="btn btn-warning btn-lg" id="submitBtn">
+                            <i class="bi bi-send-fill"></i> 提交測驗
                         </button>
                         <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary btn-lg">
                             <i class="bi bi-x-circle"></i> 取消測驗
@@ -136,7 +136,7 @@
 
         /* 題目卡片 */
         .question-card {
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #f59e0b;
             transition: all 0.3s;
         }
 
@@ -148,7 +148,7 @@
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 0.5rem;
-            border-left: 3px solid #3b82f6;
+            border-left: 3px solid #f59e0b;
         }
 
         /* 選項樣式 */
@@ -181,13 +181,13 @@
 
         .form-check-label:hover {
             background: #f3f4f6;
-            border-color: #3b82f6;
+            border-color: #f59e0b;
         }
 
         .form-check-input:checked + .form-check-label {
-            background: #eff6ff;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: #fffbeb;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
         }
 
         .choice-content {
@@ -202,7 +202,7 @@
             justify-content: center;
             width: 32px;
             height: 32px;
-            background: #3b82f6;
+            background: #f59e0b;
             color: white;
             border-radius: 50%;
             font-weight: 600;
@@ -210,7 +210,7 @@
         }
 
         .form-check-input:checked + .form-check-label .choice-letter {
-            background: #1e40af;
+            background: #d97706;
         }
 
         .choice-text {
@@ -222,7 +222,7 @@
         #timer {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #059669;
+            color: #f59e0b;
         }
 
         /* 提交按鈕 */
@@ -232,14 +232,9 @@
             transition: all 0.3s;
         }
 
-        .btn-success:hover {
+        .btn-warning:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
-        }
-
-        /* 警告提示 */
-        .alert-warning {
-            border-left: 4px solid #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
         }
 
         /* 響應式設計 */
@@ -296,12 +291,8 @@
         examForm.addEventListener('submit', function(e) {
             // 檢查是否所有題目都已作答
             const totalQuestions = {{ total_questions }};
-            let answeredCount = 0;
-
-            for (let i = 1; i <= totalQuestions; i++) {
-                const questionInputs = document.querySelectorAll(`input[name^="question_"]:checked`);
-                answeredCount = questionInputs.length;
-            }
+            const questionInputs = document.querySelectorAll(`input[name^="question_"]:checked`);
+            const answeredCount = questionInputs.length;
 
             if (answeredCount < totalQuestions) {
                 e.preventDefault();
@@ -310,7 +301,7 @@
                     return;
                 }
             } else {
-                if (!confirm('確定要提交考卷嗎？提交後將無法修改答案。')) {
+                if (!confirm('確定要提交預先測驗嗎？提交後將無法修改答案。')) {
                     e.preventDefault();
                     return;
                 }
@@ -329,7 +320,7 @@
         document.querySelectorAll('input[type="radio"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 const questionCard = this.closest('.question-card');
-                questionCard.style.borderLeftColor = '#10b981';
+                questionCard.style.borderLeftColor = '#d97706';
             });
         });
     </script>

@@ -6,374 +6,370 @@
 {% block page_subtitle %}{{ course.grade }} - {{ course.subject.name }}{% endblock %}
 
 {% block content %}
-    <!-- 返回按鈕 -->
-    <div class="mb-4">
-        <a href="{% url 'course_list' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> 返回課程列表
-        </a>
-    </div>
+<!-- 返回按鈕 -->
+<div class="mb-4">
+    <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> 返回課程列表
+    </a>
+</div>
 
-    <div class="row">
-        <!-- 左側：課程資訊 -->
-        <div class="col-lg-8">
-            <!-- 課程基本資訊 -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-info-circle"></i> 課程資訊
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- 課程標題 -->
-                        <div class="col-md-12 mb-3">
-                            <h4 class="text-primary">{{ course.title }}</h4>
-                        </div>
+<div class="row">
+    <!-- 左側：課程資訊 -->
+    <div class="col-lg-8">
+        <!-- 課程基本資訊 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> 課程資訊
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- 課程標題 -->
+                    <div class="col-md-12 mb-3">
+                        <h4 class="text-primary">{{ course.title }}</h4>
+                    </div>
 
-                        <!-- 基本資訊 -->
-                        <div class="col-md-6 mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-journal-text text-primary me-3 fs-5"></i>
-                                <div>
-                                    <div class="text-muted small">科目</div>
-                                    <div class="fw-semibold">{{ course.subject.name }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-mortarboard text-primary me-3 fs-5"></i>
-                                <div>
-                                    <div class="text-muted small">年級</div>
-                                    <div class="fw-semibold">{{ course.grade }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-person text-primary me-3 fs-5"></i>
-                                <div>
-                                    <div class="text-muted small">授課教師</div>
-                                    <div class="fw-semibold">
-                                        {% if course.teacher %}
-                                            {{ course.teacher.username }}
-                                        {% else %}
-                                            <span class="text-muted fst-italic">未指定教師</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-clock text-primary me-3 fs-5"></i>
-                                <div>
-                                    <div class="text-muted small">建立時間</div>
-                                    <div class="fw-semibold">{{ course.created_at|date:"Y年m月d日 H:i" }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-toggle-on text-primary me-3 fs-5"></i>
-                                <div>
-                                    <div class="text-muted small">狀態</div>
-                                    <div>
-                                        {% if course.is_active %}
-                                            <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> 啟用中
-                                        </span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">
-                                            <i class="bi bi-x-circle"></i> 已停用
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                    <!-- 基本資訊 -->
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-journal-text text-primary me-3 fs-5"></i>
+                            <div>
+                                <div class="text-muted small">科目</div>
+                                <div class="fw-semibold">{{ course.subject.name }}</div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- 課程描述 -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-text"></i> 課程描述
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if course.description %}
-                        <p class="mb-0" style="white-space: pre-line;">{{ course.description }}</p>
-                    {% else %}
-                        <p class="text-muted fst-italic mb-0">此課程尚未提供描述。</p>
-                    {% endif %}
-                </div>
-            </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-mortarboard text-primary me-3 fs-5"></i>
+                            <div>
+                                <div class="text-muted small">年級</div>
+                                <div class="fw-semibold">{{ course.grade }}</div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- 課程章節 -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-list-ol"></i> 課程章節
-                    </h5>
-                    {% if user.is_authenticated %}
-                        {% if user == course.teacher or user.role == 'admin' %}
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addChapterModal">
-                                <i class="bi bi-plus-circle"></i> 新增章節
-                            </button>
-                        {% endif %}
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    {% if course.chapters.exists %}
-                        <div class="list-group">
-                            {% for chapter in course.chapters.all %}
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="bi bi-book text-primary me-2"></i>
-                                        <span class="fw-semibold">{{ chapter.title }}</span>
-                                    </div>
-                                    {% if user.is_authenticated %}
-                                        {% if user == course.teacher or user.role == 'admin' %}
-                                            <div>
-                                                <button class="btn btn-sm btn-outline-secondary me-1">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        {% endif %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-person text-primary me-3 fs-5"></i>
+                            <div>
+                                <div class="text-muted small">授課教師</div>
+                                <div class="fw-semibold">
+                                    {% if course.teacher %}
+                                    {{ course.teacher.username }}
+                                    {% else %}
+                                    <span class="text-muted fst-italic">未指定教師</span>
                                     {% endif %}
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="bi bi-inbox display-4 text-muted mb-3"></i>
-                            <p class="text-muted mb-0">此課程尚未建立章節。</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- 課程管理（只在大螢幕顯示在底部） -->
-            {% if user.is_authenticated %}
-                {% if user == course.teacher or user.role == 'admin' %}
-                    <div class="card d-lg-block d-none">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="bi bi-gear"></i> 課程管理
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex gap-2">
-                                <a href="{% url 'course_edit' course.pk %}" class="btn btn-primary">
-                                    <i class="bi bi-pencil"></i> 編輯課程
-                                </a>
-                                <a href="{% url 'course_delete' course.pk %}" class="btn btn-danger">
-                                    <i class="bi bi-trash"></i> 刪除課程
-                                </a>
                             </div>
                         </div>
                     </div>
-                {% endif %}
-            {% endif %}
+
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-clock text-primary me-3 fs-5"></i>
+                            <div>
+                                <div class="text-muted small">建立時間</div>
+                                <div class="fw-semibold">{{ course.created_at|date:"Y年m月d日 H:i" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-toggle-on text-primary me-3 fs-5"></i>
+                            <div>
+                                <div class="text-muted small">狀態</div>
+                                <div>
+                                    {% if course.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> 啟用中
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-x-circle"></i> 已停用
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- 右側：操作按鈕 -->
-        <div class="col-lg-4">
-            <!-- 學習操作 -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-play-circle"></i> 課程操作
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-3">
-                        <!-- 開始上課 -->
-                        <button class="btn btn-lg btn-primary" onclick="startLesson()">
-                            <i class="bi bi-book-half fs-5"></i>
-                            <div class="mt-2">
-                                <div class="fw-bold">開始上課</div>
-                                <small class="d-block opacity-75">進入課程學習</small>
-                            </div>
-                        </button>
-
-                        <!-- 開始問答 -->
-                        <button class="btn btn-lg btn-info text-white" onclick="startQA()">
-                            <i class="bi bi-chat-dots fs-5"></i>
-                            <div class="mt-2">
-                                <div class="fw-bold">開始問答</div>
-                                <small class="d-block opacity-75">互動問答練習</small>
-                            </div>
-                        </button>
-
-                        <!-- 開始考試 -->
-                        <button class="btn btn-lg btn-success" onclick="startExam()">
-                            <i class="bi bi-clipboard-check fs-5"></i>
-                            <div class="mt-2">
-                                <div class="fw-bold">開始考試</div>
-                                <small class="d-block opacity-75">測驗你的學習成果</small>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+        <!-- 課程描述 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-text"></i> 課程描述
+                </h5>
             </div>
-
-            <!-- 課程統計 -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi bi-graph-up"></i> 學習統計
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">課程進度</span>
-                            <span class="fw-bold text-primary">0%</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="text-muted small">
-                            <i class="bi bi-book"></i> 章節數
-                        </span>
-                            <span class="fw-bold">{{ course.chapters.count }}</span>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="text-muted small">
-                            <i class="bi bi-people"></i> 學生數
-                        </span>
-                            <span class="fw-bold">0</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="text-muted small">
-                            <i class="bi bi-star"></i> 平均分數
-                        </span>
-                            <span class="fw-bold">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 課程管理（小螢幕顯示） -->
-            {% if user.is_authenticated %}
-                {% if user == course.teacher or user.role == 'admin' %}
-                    <div class="card d-lg-none">
-                        <div class="card-header">
-                            <h6 class="mb-0">
-                                <i class="bi bi-gear"></i> 課程管理
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <a href="{% url 'course_edit' course.pk %}" class="btn btn-primary">
-                                    <i class="bi bi-pencil"></i> 編輯課程
-                                </a>
-                                <a href="{% url 'course_delete' course.pk %}" class="btn btn-danger">
-                                    <i class="bi bi-trash"></i> 刪除課程
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card-body">
+                {% if course.description %}
+                <p class="mb-0" style="white-space: pre-line;">{{ course.description }}</p>
+                {% else %}
+                <p class="text-muted fst-italic mb-0">此課程尚未提供描述。</p>
                 {% endif %}
-            {% endif %}
+            </div>
         </div>
+
+        <!-- 課程章節 -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ol"></i> 課程章節
+                </h5>
+                {% if user.is_authenticated %}
+                {% if user == course.teacher or user.role == 'admin' %}
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addChapterModal">
+                    <i class="bi bi-plus-circle"></i> 新增章節
+                </button>
+                {% endif %}
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if course.chapters.exists %}
+                <div class="list-group">
+                    {% for chapter in course.chapters.all %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-book text-primary me-2"></i>
+                            <span class="fw-semibold">{{ chapter.title }}</span>
+                        </div>
+                        {% if user.is_authenticated %}
+                        {% if user == course.teacher or user.role == 'admin' %}
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox display-4 text-muted mb-3"></i>
+                    <p class="text-muted mb-0">此課程尚未建立章節。</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 課程管理（只在大螢幕顯示在底部） -->
+        {% if user.is_authenticated %}
+        {% if user == course.teacher or user.role == 'admin' %}
+        <div class="card d-lg-block d-none">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-gear"></i> 課程管理
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'courses:course_edit' course.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> 編輯課程
+                    </a>
+                    <a href="{% url 'courses:course_delete' course.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> 刪除課程
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
 
-    <!-- 新增章節 Modal -->
-    <div class="modal fade" id="addChapterModal" tabindex="-1" aria-labelledby="addChapterModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addChapterModalLabel">
-                        <i class="bi bi-plus-circle"></i> 新增章節
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="#" id="addChapterForm">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="chapterTitle" class="form-label">章節標題 <span class="text-danger">*</span></label>
-                            <input type="text"
-                                   class="form-control"
-                                   id="chapterTitle"
-                                   name="title"
-                                   required
-                                   placeholder="請輸入章節標題">
+    <!-- 右側：操作按鈕 -->
+    <div class="col-lg-4">
+        <!-- 學習操作 -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-play-circle"></i> 課程操作
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <!-- 開始上課 -->
+                    <button class="btn btn-lg btn-primary" onclick="startLesson()">
+                        <i class="bi bi-book-half fs-5"></i>
+                        <div class="mt-2">
+                            <div class="fw-bold">開始上課</div>
+                            <small class="d-block opacity-75">進入課程學習</small>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="submit" form="addChapterForm" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> 確認新增
+                    </button>
+
+                    <!-- 開始問答 -->
+                    <button class="btn btn-lg btn-info text-white" onclick="startQA()">
+                        <i class="bi bi-chat-dots fs-5"></i>
+                        <div class="mt-2">
+                            <div class="fw-bold">開始問答</div>
+                            <small class="d-block opacity-75">互動問答練習</small>
+                        </div>
+                    </button>
+
+                    <!-- 開始考試 -->
+                    <button class="btn btn-lg btn-success" onclick="startExam()">
+                        <i class="bi bi-clipboard-check fs-5"></i>
+                        <div class="mt-2">
+                            <div class="fw-bold">開始考試</div>
+                            <small class="d-block opacity-75">測驗你的學習成果</small>
+                        </div>
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- 課程統計 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-graph-up"></i> 學習統計
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">課程進度</span>
+                        <span class="fw-bold text-primary">0%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small">
+                            <i class="bi bi-book"></i> 章節數
+                        </span>
+                        <span class="fw-bold">{{ course.chapters.count }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small">
+                            <i class="bi bi-people"></i> 學生數
+                        </span>
+                        <span class="fw-bold">0</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small">
+                            <i class="bi bi-star"></i> 平均分數
+                        </span>
+                        <span class="fw-bold">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 課程管理（小螢幕顯示） -->
+        {% if user.is_authenticated %}
+        {% if user == course.teacher or user.role == 'admin' %}
+        <div class="card d-lg-none">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-gear"></i> 課程管理
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'courses:course_edit' course.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> 編輯課程
+                    </a>
+                    <a href="{% url 'courses:course_delete' course.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> 刪除課程
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
+</div>
+
+<!-- 新增章節 Modal -->
+<div class="modal fade" id="addChapterModal" tabindex="-1" aria-labelledby="addChapterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addChapterModalLabel">
+                    <i class="bi bi-plus-circle"></i> 新增章節
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="#" id="addChapterForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="chapterTitle" class="form-label">章節標題 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="chapterTitle" name="title" required
+                            placeholder="請輸入章節標題">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" form="addChapterForm" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> 確認新增
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}
-    <style>
-        /* 按鈕樣式增強 */
-        .btn-lg {
-            padding: 1.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s;
-        }
+<style>
+    /* 按鈕樣式增強 */
+    .btn-lg {
+        padding: 1.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s;
+    }
 
-        .btn-lg:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
+    .btn-lg:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
 
-        .btn-lg i {
-            display: block;
-        }
-    </style>
+    .btn-lg i {
+        display: block;
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // 開始上課
-        function startLesson() {
-            // TODO: 實作開始上課功能
-            alert('開始上課功能開發中...');
-            // window.location.href = '/courses/{{ course.pk }}/lesson/';
-        }
+<script>
+    // 開始上課
+    function startLesson() {
+        // TODO: 實作開始上課功能
+        alert('開始上課功能開發中...');
+        // window.location.href = '/courses/{{ course.pk }}/lesson/';
+    }
 
-        // 開始問答
-        function startQA() {
-            // TODO: 實作開始問答功能
-            window.location.href = '{% url "course_qa_chat" course.pk %}';
-        }
+    // 開始問答
+    function startQA() {
+        // TODO: 實作開始問答功能
+        window.location.href = '{% url "courses:course_qa_chat" course.pk %}';
+    }
 
-        // 開始考試
-        function startExam() {
-            // TODO: 實作開始考試功能
-            window.location.href = '{% url "course_exam" course.pk %}';
-        }
-    </script>
+    // 開始考試
+    function startExam() {
+        // TODO: 實作開始考試功能
+        window.location.href = '{% url "courses:course_exam" course.pk %}';
+    }
+</script>
 {% endblock %}
