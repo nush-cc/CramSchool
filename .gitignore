@@ -48,3 +48,9 @@ htmlcov/
 Thumbs.db
 courses/management/commands
 data/
+chatbot/dataset/
+chatbot/faiss_index_exercise/*.faiss
+chatbot/faiss_index_exercise/*.pkl
+chatbot/faiss_index_teaching/*.faiss
+chatbot/faiss_index_teaching/*.pkl
+chatbot/config.py

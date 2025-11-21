@@ -81,7 +81,12 @@ class Course(models.Model):
     class Meta:
         verbose_name = "課程"
         verbose_name_plural = "課程"
-        ordering = ["grade", "subject"]
+        ordering = [
+            "grade__education_level__order",
+            "grade__order",
+            "subject__name",
+            "title",
+        ]
 
     def __str__(self):
         return f"{self.grade} - {self.subject.name} - {self.title}"
@@ -112,6 +117,13 @@ class Chapter(models.Model):
     class Meta:
         verbose_name = "章節"
         verbose_name_plural = "章節"
+        ordering = [
+            "course__grade__education_level__order",
+            "course__grade__order",
+            "course__subject__name",
+            "course__title",
+            "title",
+        ]
 
     def __str__(self):
         return self.title

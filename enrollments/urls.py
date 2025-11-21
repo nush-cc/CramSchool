@@ -10,6 +10,20 @@ urlpatterns = [
     path("", views.enrollment_list, name="enrollment_list"),
     # 申請選課
     path("enroll/<int:course_id>/", views.enroll_course, name="enroll_course"),
+    # 老師核准管理頁面
+    path(
+        "teacher/approvals/", views.teacher_approval_list, name="teacher_approval_list"
+    ),
+    # 老師核准一個申請分組
+    path(
+        "teacher/approve-group/",
+        views.teacher_approve_group,
+        name="teacher_approve_group",
+    ),
+    # 老師拒絕一個申請分組
+    path(
+        "teacher/reject-group/", views.teacher_reject_group, name="teacher_reject_group"
+    ),
     # 核准選課（管理員）
     path(
         "approve/<int:enrollment_id>/",

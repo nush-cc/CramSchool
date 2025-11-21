@@ -12,17 +12,24 @@ class User(AbstractUser):
     ]
 
     LEVEL_CHOICES = [
-        ("A", "A 組"),
-        ("B", "B 組"),
-        ("C", "C 組"),
+        ("advanced", "進階級"),
+        ("standard", "標準級"),
+        ("basic", "基礎級"),
     ]
 
     phone = models.CharField(max_length=20, blank=True, verbose_name="電話號碼")
     role = models.CharField(
         max_length=10, choices=ROLE_CHOICES, default="student", verbose_name="角色"
     )
+    grade = models.ForeignKey(
+        "courses.Grade",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="年級",
+    )
     level = models.CharField(
-        max_length=1,
+        max_length=20,
         choices=LEVEL_CHOICES,
         null=True,
         blank=True,
@@ -51,3 +58,11 @@ class User(AbstractUser):
 
     def is_admin(self):
         return self.role == "admin"
+
+    def save(self, *args, **kwargs):
+        """保存時自動根據角色設定 is_staff"""
+        if self.role in ["teacher", "admin"]:
+            self.is_staff = True
+        else:
+            self.is_staff = False
+        super().save(*args, **kwargs)

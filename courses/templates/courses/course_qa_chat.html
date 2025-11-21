@@ -49,7 +49,7 @@
 
                     <!-- 輸入區域 -->
                     <div class="card-footer chat-input-area">
-                        <form id="chatForm" class="d-flex gap-2 align-items-end">
+                        <form id="chatForm" class="d-flex gap-2 align-items-end" onsubmit="return false;">
                             <div class="flex-grow-1">
                             <textarea
                                     class="form-control chat-input"
@@ -58,7 +58,7 @@
                                     placeholder="輸入你的問題... (Enter 發送，Shift+Enter 換行)"
                                     required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-send" id="sendButton">
+                            <button type="button" class="btn btn-primary btn-send" id="sendButton">
                                 <i class="bi bi-send-fill"></i>
                                 <span class="ms-2 d-none d-sm-inline">發送</span>
                             </button>
@@ -78,47 +78,49 @@
                     </div>
                     <div class="card-body p-2">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個基礎題目來練習">
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個基礎題目來練習"
+                                    data-search-type="exercise">
                                 <i class="bi bi-1-circle"></i> 基礎題目
                             </button>
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個進階題目來挑戰">
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個進階題目來挑戰"
+                                    data-search-type="exercise">
                                 <i class="bi bi-2-circle"></i> 進階題目
                             </button>
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個應用題來練習">
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個應用題來練習"
+                                    data-search-type="exercise">
                                 <i class="bi bi-3-circle"></i> 應用題目
                             </button>
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個綜合題目">
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個綜合題目"
+                                    data-search-type="exercise">
                                 <i class="bi bi-star"></i> 綜合題目
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 理解程度回饋 -->
+                <!-- 學習等級顯示 -->
                 <div class="card shadow-sm">
                     <div class="card-header bg-info text-white">
                         <h6 class="mb-0">
-                            <i class="bi bi-emoji-smile"></i> 理解程度
+                            <i class="bi bi-speedometer2"></i> 你的學習等級
                         </h6>
                     </div>
-                    <div class="card-body p-2">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-sm btn-outline-success feedback-btn" data-feedback="完全理解" data-level="understand">
-                                <i class="bi bi-emoji-laughing"></i> 完全理解
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning feedback-btn" data-feedback="大致理解" data-level="mostly">
-                                <i class="bi bi-emoji-smile"></i> 大致理解
-                            </button>
-                            <button class="btn btn-sm btn-outline-warning feedback-btn" data-feedback="不太理解" data-level="partial">
-                                <i class="bi bi-emoji-neutral"></i> 不太理解
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger feedback-btn" data-feedback="無法理解" data-level="confused">
-                                <i class="bi bi-emoji-frown"></i> 無法理解
-                            </button>
+                    <div class="card-body text-center p-3">
+                        <div class="level-badge-display mb-2">
+                            <span class="badge badge-level-{{ user_level_code }} fs-6">
+                                {{ user_level_display }}
+                            </span>
                         </div>
+                        <small class="text-muted d-block">
+                            AI 會根據你的等級調整解釋方式
+                        </small>
                         <hr class="my-2">
-                        <small class="text-muted d-block text-center">
-                            <i class="bi bi-info-circle"></i> 點擊回饋你的理解程度
+                        <small class="text-muted d-block">
+                            <i class="bi bi-info-circle"></i> 如果不懂，可以點擊回答下方的「我還是不懂」按鈕，AI 會降低難度重新解釋
                         </small>
                     </div>
                 </div>
@@ -317,6 +319,50 @@
             box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
         }
 
+        /* 等級徽章樣式 */
+        .badge-level-advanced {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .badge-level-standard {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .badge-level-basic {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        /* 訊息反饋按鈕樣式 */
+        .message-feedback {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .message-feedback .feedback-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .message-feedback .btn-sm {
+            font-size: 0.8rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .level-indicator {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
         /* 載入動畫 */
         .typing-indicator {
             display: flex;
@@ -431,10 +477,150 @@
                 min-height: 400px;
             }
         }
+
+        /* Markdown 內容樣式 */
+        .markdown-content {
+            line-height: 1.6;
+        }
+
+        .markdown-content p {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .markdown-content strong {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .markdown-content em {
+            font-style: italic;
+            color: #475569;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .markdown-content code {
+            background-color: #f1f5f9;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            color: #e11d48;
+        }
+
+        .markdown-content pre {
+            background-color: #1e293b;
+            color: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4,
+        .markdown-content h5,
+        .markdown-content h6 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .markdown-content h1 { font-size: 1.5em; }
+        .markdown-content h2 { font-size: 1.3em; }
+        .markdown-content h3 { font-size: 1.1em; }
+
+        .markdown-content blockquote {
+            border-left: 3px solid #cbd5e1;
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 1rem 0;
+        }
+
+        .markdown-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content table th,
+        .markdown-content table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .markdown-content table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+
+        /* 數學佔位符樣式（當原始公式遺失時顯示） */
+        .math-placeholder {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9em;
+            border: 1px dashed #fbbf24;
+            cursor: help;
+        }
+
+        .math-placeholder:hover {
+            background-color: #fde68a;
+        }
     </style>
 {% endblock %}
 
 {% block extra_js %}
+    <!-- MathJax 數學公式渲染 -->
+    <script>
+        // MathJax 配置
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+    <!-- Marked.js Markdown 渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
         const chatMessages = document.getElementById('chatMessages');
         const chatForm = document.getElementById('chatForm');
@@ -443,44 +629,154 @@
         const quickQuestionBtns = document.querySelectorAll('.quick-question-btn');
         const feedbackBtns = document.querySelectorAll('.feedback-btn');
 
+        // 配置 Marked.js
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,  // 支援換行
+                gfm: true,     // GitHub Flavored Markdown
+                headerIds: false,
+                mangle: false
+            });
+        }
+
+        // Markdown 渲染函數（保護 LaTeX 公式）
+        function renderMarkdown(text) {
+            if (!text) return '';
+
+            // ⚠️ 重要：先處理來自後端的 MATH_ 佔位符（PDF 提取時產生的）
+            // 將它們替換為更友好的文字，避免與我們自己的佔位符衝突
+            text = text.replace(/MATH_INLINE_(\d+)/g, '<span class="math-placeholder" title="原始數學公式遺失">[公式$1]</span>');
+            text = text.replace(/MATH_BLOCK_(\d+)/g, '<div class="math-placeholder" title="原始數學公式遺失">[數學區塊$1]</div>');
+
+            // 也處理沒有底線的版本
+            text = text.replace(/MATH_INLINE(\d+)/g, '<span class="math-placeholder" title="原始數學公式遺失">[公式$1]</span>');
+            text = text.replace(/MATH_BLOCK(\d+)/g, '<div class="math-placeholder" title="原始數學公式遺失">[數學區塊$1]</div>');
+
+            // 1. 保護真正的 LaTeX 公式，使用不會衝突的佔位符前綴
+            const mathPlaceholders = {};
+            let placeholderCounter = 0;
+            let protectedText = text;
+
+            // 保護 display math: \[...\] 和 $$...$$
+            protectedText = protectedText.replace(/(\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$)/g, (match) => {
+                const placeholder = `XPROTECTEDXDISPLAYXMATHX${placeholderCounter}X`;
+                mathPlaceholders[placeholder] = match;
+                placeholderCounter++;
+                return placeholder;
+            });
+
+            // 保護 inline math: \(...\) 和 $...$
+            protectedText = protectedText.replace(/(\\\([\s\S]*?\\\)|\$[^\$\n]+?\$)/g, (match) => {
+                const placeholder = `XPROTECTEDXINLINEXMATHX${placeholderCounter}X`;
+                mathPlaceholders[placeholder] = match;
+                placeholderCounter++;
+                return placeholder;
+            });
+
+            // 2. 使用 Marked 渲染 Markdown
+            let rendered = marked.parse(protectedText);
+
+            // 3. 還原真正的 LaTeX 公式 - 使用簡單的字符串替換
+            for (const [placeholder, original] of Object.entries(mathPlaceholders)) {
+                // 使用 split-join 方式替換所有出現的佔位符
+                rendered = rendered.split(placeholder).join(original);
+            }
+
+            return rendered;
+        }
+
+        // 對話歷史管理（使用 sessionStorage，重整頁面就清空）
+        let conversationHistory = JSON.parse(sessionStorage.getItem('chatHistory_{{ course.pk }}')) || [];
+
+        // 當前問題和答案（用於深入追問）
+        let currentQuestion = '';
+        let currentAnswer = '';
+        let currentSegments = [];
+        let currentSearchType = 'teaching';  // 追蹤當前搜尋類型
+        let currentExerciseQuestion = '';  // 練習題模式：儲存題目
+        let currentExerciseAnswer = '';    // 練習題模式：儲存答案
+
+        // 難度等級管理
+        let currentResponseLevel = '{{ user_level_code }}';  // 從後端取得使用者等級 (advanced/standard/basic)
+        let retryCount = 0;  // 重試次數
+
+        // 難度等級映射
+        const LEVEL_DOWNGRADE = {
+            'advanced': 'standard',
+            'standard': 'basic',
+            'basic': 'basic'  // 基礎級保持不變，但會換角度
+        };
+
+        const LEVEL_DISPLAY_NAMES = {
+            'advanced': '進階級',
+            'standard': '標準級',
+            'basic': '基礎級'
+        };
+
+        // 獲取 CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
         // 自動調整 textarea 高度
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-        // 發送訊息
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+        // 發送訊息的通用處理函數
+        function handleSendMessage() {
             const message = messageInput.value.trim();
             if (message) {
                 sendMessage(message);
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
             }
+        }
+
+        // 表單提交事件（防止預設行為）
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleSendMessage();
+        });
+
+        // 發送按鈕點擊事件
+        sendButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleSendMessage();
         });
 
         // 快速提問按鈕
         quickQuestionBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 const question = this.getAttribute('data-question');
-                sendMessage(question);
+                const searchType = this.getAttribute('data-search-type') || 'teaching';
+                sendMessage(question, searchType);
             });
         });
 
-        // 理解程度回饋按鈕
-        feedbackBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const feedback = this.getAttribute('data-feedback');
-                const level = this.getAttribute('data-level');
-                sendFeedback(feedback, level);
-            });
-        });
+        // 發送訊息函數（呼叫真實 API）
+        function sendMessage(message, searchType = 'teaching', isRetry = false, useAlternative = false, retryCountParam = 0) {
+            // 只在非重試時顯示用戶訊息
+            if (!isRetry) {
+                addMessage(message, 'user');
+            }
 
-        // 發送訊息函數
-        function sendMessage(message) {
-            // 顯示用戶訊息
-            addMessage(message, 'user');
+            // 儲存當前問題和搜尋類型
+            currentQuestion = message;
+            currentSearchType = searchType;
 
             // 禁用輸入
             sendButton.disabled = true;
@@ -489,62 +785,169 @@
             // 顯示載入動畫
             showTypingIndicator();
 
-            // 模擬 AI 回覆 (之後替換為真實 API 呼叫)
-            setTimeout(() => {
+            // 呼叫 Django API
+            fetch("{% url 'courses:course_qa_api' course.pk %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    message: message,
+                    history: conversationHistory.slice(-10),  // 最近 5 輪（10 條訊息）
+                    search_type: searchType,  // 使用傳入的 searchType 參數
+                    learner_style: LEVEL_DISPLAY_NAMES[currentResponseLevel],  // 當前難度
+                    is_retry: isRetry,  // 是否為重試
+                    retry_count: retryCountParam,  // 重試次數
+                    use_alternative: useAlternative  // 是否換角度
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
                 removeTypingIndicator();
-                const aiResponse = generateMockResponse(message);
-                addMessage(aiResponse, 'ai');
+
+                // 儲存答案和分段
+                currentAnswer = data.answer;
+                currentSegments = data.segments || [];
+
+                // 判斷是否為練習題模式
+                if (data.exercise_question && data.exercise_answer) {
+                    // 練習題模式：儲存題目和答案
+                    currentExerciseQuestion = data.exercise_question;
+                    currentExerciseAnswer = data.exercise_answer;
+
+                    // 顯示題目和答案遮罩
+                    addMessage('', 'ai', null, {
+                        question: data.exercise_question,
+                        answer: data.exercise_answer
+                    });
+                } else {
+                    // 一般對話模式：清空練習題資料
+                    currentExerciseQuestion = '';
+                    currentExerciseAnswer = '';
+
+                    // 顯示分段
+                    addMessage(data.answer, 'ai', data.segments);
+                }
+
+                // 更新對話歷史
+                conversationHistory.push({role: 'user', content: message});
+                conversationHistory.push({role: 'assistant', content: data.answer});
+                sessionStorage.setItem('chatHistory_{{ course.pk }}', JSON.stringify(conversationHistory));
 
                 // 啟用輸入
                 sendButton.disabled = false;
                 messageInput.disabled = false;
                 messageInput.focus();
-            }, 1500 + Math.random() * 1000);
-        }
-
-        // 發送理解程度回饋
-        function sendFeedback(feedback, level) {
-            const message = `我目前的理解程度：${feedback}`;
-            addMessage(message, 'user');
-
-            // 禁用輸入
-            sendButton.disabled = true;
-            messageInput.disabled = true;
-
-            // 顯示載入動畫
-            showTypingIndicator();
-
-            // 根據理解程度給予不同回覆
-            setTimeout(() => {
+            })
+            .catch(error => {
+                console.error('Error:', error);
                 removeTypingIndicator();
-                let aiResponse = '';
-
-                switch(level) {
-                    case 'understand':
-                        aiResponse = '太棒了！👏 看來你已經完全掌握這個概念了。\n\n要不要試試更進階的題目來挑戰自己？或者我可以為你介紹下一個主題。';
-                        break;
-                    case 'mostly':
-                        aiResponse = '很好！😊 你已經理解了大部分內容。\n\n我可以針對你不太確定的部分再詳細說明，或者提供一些練習題來鞏固你的理解。需要我做什麼嗎？';
-                        break;
-                    case 'partial':
-                        aiResponse = '沒關係，學習需要時間。💡 讓我用另一種方式來解釋這個概念。\n\n我會用更簡單的例子和步驟來說明。你也可以告訴我具體哪個部分不太理解，我會特別針對那個部分加強說明。';
-                        break;
-                    case 'confused':
-                        aiResponse = '別擔心，我會幫助你！🤝 讓我們從最基礎的部分開始。\n\n我會把這個概念拆解成更小的步驟，一步一步帶你理解。你可以隨時打斷我提問，我們一起把它搞懂！';
-                        break;
-                }
-
-                addMessage(aiResponse, 'ai');
+                addMessage('抱歉，發生錯誤：' + error.message + '\n\n請確認 AI 服務是否正常運行。', 'ai');
 
                 // 啟用輸入
                 sendButton.disabled = false;
                 messageInput.disabled = false;
-            }, 1500);
+                messageInput.focus();
+            });
+        }
+
+        // 發送理解程度回饋
+        // 重試（降級或換角度）
+        function retryWithLowerLevel(messageId) {
+            // 取得原始問題
+            const originalQuestion = currentQuestion;
+
+            if (!originalQuestion) {
+                alert('無法找到原始問題');
+                return;
+            }
+
+            // 檢查是否為練習題模式
+            const isExerciseMode = (currentSearchType === 'exercise' && currentExerciseQuestion);
+
+            // 計算新的難度等級
+            const nextLevel = LEVEL_DOWNGRADE[currentResponseLevel];
+            const isDowngrade = nextLevel !== currentResponseLevel;
+
+            if (!isDowngrade) {
+                // 基礎級：增加重試次數，用於提示後端換角度
+                retryCount++;
+            } else {
+                // 降級：重置重試次數
+                retryCount = 0;
+            }
+
+            // 顯示提示訊息
+            if (isExerciseMode) {
+                // 練習題模式：顯示換角度解釋的提示
+                if (isDowngrade) {
+                    addMessage(`🔄 正在用更簡單的方式重新解釋這題... (${LEVEL_DISPLAY_NAMES[currentResponseLevel]} → ${LEVEL_DISPLAY_NAMES[nextLevel]})`, 'system');
+                } else {
+                    addMessage(`🔄 換個角度重新解釋這題的解法... (${LEVEL_DISPLAY_NAMES[currentResponseLevel]} - 方法 ${retryCount + 1})`, 'system');
+                }
+            } else {
+                // 一般模式：顯示一般提示
+                if (isDowngrade) {
+                    addMessage(`🔄 正在用更簡單的方式重新解釋... (${LEVEL_DISPLAY_NAMES[currentResponseLevel]} → ${LEVEL_DISPLAY_NAMES[nextLevel]})`, 'system');
+                } else {
+                    addMessage(`🔄 換個角度重新解釋... (${LEVEL_DISPLAY_NAMES[currentResponseLevel]} - 方法 ${retryCount + 1})`, 'system');
+                }
+            }
+
+            // 更新當前難度等級
+            currentResponseLevel = nextLevel;
+
+            // 根據模式決定重新發送的內容
+            if (isExerciseMode) {
+                // 練習題模式：構建「請解釋這題」的問題，並附上題目內容
+                const explainQuestion = `請用不同的方法解釋這題的解法：\n\n${currentExerciseQuestion}`;
+
+                // 使用 teaching 模式重新發送（因為我們要解釋，而非出新題）
+                sendMessage(explainQuestion, 'teaching', true, !isDowngrade, retryCount);
+            } else {
+                // 一般模式：重新發送原始問題（使用 hybrid 模式）
+                sendMessage(originalQuestion, 'hybrid', true, !isDowngrade, retryCount);
+            }
+        }
+
+        // 標記為已理解
+        function markAsUnderstood(messageId) {
+            const feedbackDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = '<small class="text-success"><i class="bi bi-check-circle-fill"></i> 已標記為理解</small>';
+            }
+
+            // 未來可以加入：發送到後端記錄使用者理解情況
         }
 
         // 添加訊息到聊天視窗
-        function addMessage(text, sender) {
+        function addMessage(text, sender, segments = null, exerciseData = null) {
             const messageWrapper = document.createElement('div');
+
+            // 系統訊息使用特殊樣式
+            if (sender === 'system') {
+                messageWrapper.className = 'message-wrapper ai-message';
+                messageWrapper.innerHTML = `
+                    <div class="message-avatar" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-bubble" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #3b82f6; color: #1e40af;">
+                            <div style="font-weight: 600;">${text}</div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageWrapper);
+                scrollToBottom();
+                return;
+            }
+
             messageWrapper.className = `message-wrapper ${sender}-message`;
 
             const currentTime = new Date().toLocaleTimeString('zh-TW', {
@@ -556,22 +959,136 @@
             const senderName = sender === 'ai' ? 'AI 助教' : '你';
             const bubbleClass = sender === 'ai' ? 'ai' : 'user';
 
+            let contentHTML = '';
+
+            // 練習題模式（有題目和答案）
+            if (sender === 'ai' && exerciseData && exerciseData.question && exerciseData.answer) {
+                const answerId = `answer-${Date.now()}`;
+                const buttonId = `btn-${Date.now()}`;
+                // 渲染 Markdown
+                const renderedQuestion = renderMarkdown(exerciseData.question);
+                const renderedAnswer = renderMarkdown(exerciseData.answer);
+                contentHTML = `
+                    <div class="message-bubble ${bubbleClass}">
+                        <div class="exercise-question">
+                            <h6 style="color: #0d6efd; margin-bottom: 12px;">
+                                <i class="bi bi-pencil-square"></i> 練習題
+                            </h6>
+                            <div class="markdown-content">${renderedQuestion}</div>
+                        </div>
+                        <div class="exercise-answer-section" style="margin-top: 16px;">
+                            <button class="btn btn-outline-primary btn-sm" id="${buttonId}"
+                                    onclick="toggleAnswer('${answerId}', '${buttonId}')">
+                                <i class="bi bi-eye"></i> 顯示答案
+                            </button>
+                            <div class="exercise-answer" id="${answerId}"
+                                 style="display: none; margin-top: 12px; padding: 12px; background: #f8f9fa; border-left: 3px solid #28a745; border-radius: 4px;">
+                                <h6 style="color: #28a745; margin-bottom: 8px;">
+                                    <i class="bi bi-check-circle"></i> 答案
+                                </h6>
+                                <div class="markdown-content">${renderedAnswer}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            // 如果有分段，顯示可點擊的分段（一般對話模式）
+            else if (sender === 'ai' && segments && segments.length > 0) {
+                const timestamp = Date.now(); // 在外層生成一次時間戳
+                contentHTML = '<div class="message-bubble-segments">';
+                segments.forEach((segment, index) => {
+                    const segmentId = `segment-${timestamp}-${index}`;
+                    // 渲染 Markdown
+                    const renderedSegment = renderMarkdown(segment);
+                    contentHTML += `
+                        <div class="segment-item"
+                             data-segment-index="${index}"
+                             data-segment-text="${segment.replace(/"/g, '&quot;')}"
+                             id="${segmentId}"
+                             style="padding: 10px; margin: 8px 0; border-left: 3px solid #0d6efd; background: rgba(13, 110, 253, 0.05); border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+                             onmouseover="this.style.background='rgba(13, 110, 253, 0.1)'"
+                             onmouseout="this.style.background='rgba(13, 110, 253, 0.05)'">
+                            <div class="markdown-content">${renderedSegment}</div>
+                            <small class="text-muted" style="display: block; margin-top: 8px;">
+                                <i class="bi bi-hand-index"></i> 點擊這段文字可以深入了解
+                            </small>
+                        </div>
+                    `;
+                });
+                contentHTML += '</div>';
+            } else {
+                // 一般訊息
+                const renderedText = sender === 'ai' ? renderMarkdown(text) : text;
+                contentHTML = `
+                    <div class="message-bubble ${bubbleClass}">
+                        <div class="markdown-content">${renderedText}</div>
+                    </div>
+                `;
+            }
+
+            // 如果是 AI 回答，加入反饋按鈕
+            let feedbackHTML = '';
+            if (sender === 'ai') {
+                const messageId = `msg-${Date.now()}`;
+                feedbackHTML = `
+                    <div class="message-feedback" data-message-id="${messageId}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="feedback-buttons">
+                                <button class="btn btn-sm btn-outline-warning" onclick="retryWithLowerLevel('${messageId}')">
+                                    <i class="bi bi-lightbulb"></i> 我還是不懂
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="markAsUnderstood('${messageId}')">
+                                    <i class="bi bi-hand-thumbs-up"></i> 我懂了
+                                </button>
+                            </div>
+                            <small class="level-indicator">
+                                <i class="bi bi-speedometer2"></i> ${LEVEL_DISPLAY_NAMES[currentResponseLevel]}
+                            </small>
+                        </div>
+                    </div>
+                `;
+            }
+
             messageWrapper.innerHTML = `
-            <div class="message-avatar">
-                <i class="bi ${avatarIcon}"></i>
-            </div>
-            <div class="message-content">
-                <div class="message-header">
-                    <span class="message-sender">${senderName}</span>
-                    <span class="message-time">${currentTime}</span>
+                <div class="message-avatar">
+                    <i class="bi ${avatarIcon}"></i>
                 </div>
-                <div class="message-bubble ${bubbleClass}">
-                    <p class="mb-0">${text}</p>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-sender">${senderName}</span>
+                        <span class="message-time">${currentTime}</span>
+                    </div>
+                    ${contentHTML}
+                    ${feedbackHTML}
                 </div>
-            </div>
-        `;
+            `;
 
             chatMessages.appendChild(messageWrapper);
+
+            // 如果有分段，為每個分段添加點擊事件
+            if (sender === 'ai' && segments && segments.length > 0) {
+                // 直接使用 class 選擇器來綁定事件，不依賴 ID
+                const segmentItems = messageWrapper.querySelectorAll('.segment-item');
+                console.log('找到的 segment 數量:', segmentItems.length);
+                segmentItems.forEach((segmentElement, idx) => {
+                    console.log(`為 segment ${idx} 綁定點擊事件`);
+                    segmentElement.addEventListener('click', function(e) {
+                        console.log('Segment 被點擊了！');
+                        e.stopPropagation(); // 防止事件冒泡
+                        const segmentText = this.getAttribute('data-segment-text');
+                        console.log('選中的文字:', segmentText ? segmentText.substring(0, 50) : 'null');
+                        requestClarification(segmentText);
+                    });
+                });
+            }
+
+            // 渲染數學公式（MathJax）
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([messageWrapper]).catch((err) => {
+                    console.log('MathJax 渲染錯誤:', err);
+                });
+            }
+
             scrollToBottom();
         }
 
@@ -614,44 +1131,103 @@
             });
         }
 
-        // 模擬 AI 回覆 (之後替換為真實 API)
-        function generateMockResponse(question) {
-            const responses = [
-                '這是一個很好的問題！讓我為你詳細解釋一下...\n\n',
-                '根據課程內容，我可以告訴你...\n\n',
-                '這個概念確實很重要。簡單來說...\n\n',
-                '讓我用一個例子來說明這個問題...\n\n',
-                '這涉及到幾個關鍵點：\n\n',
-            ];
-
-            const details = [
-                '這個主題在考試中經常出現，建議你多加練習。',
-                '你可以參考課程的相關章節來深入了解。',
-                '如果還有不清楚的地方，歡迎繼續提問！',
-                '建議你做一些相關的練習題來加強理解。',
-                '這個概念與之前學過的內容有關聯，可以一起複習。',
-            ];
-
-            // 檢查是否是請求題目
-            if (question.includes('題目') || question.includes('練習') || question.includes('挑戰')) {
-                return '📝 這是一個模擬題目：\n\n題目：請計算 2 + 2 = ?\n\n提示：這是一個基礎的數學運算題。\n\n你可以試著解答，我會為你檢查答案並提供解析。';
+        // 深入追問函數
+        function requestClarification(selectedText) {
+            if (!selectedText || !currentQuestion) {
+                console.error('缺少必要參數');
+                return;
             }
 
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            const randomDetail = details[Math.floor(Math.random() * details.length)];
+            // 顯示使用者選擇的片段
+            addMessage(`我想深入了解：「${selectedText.substring(0, 100)}...」`, 'user');
 
-            return `${randomResponse}${randomDetail}`;
+            // 禁用輸入
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+
+            // 顯示載入動畫
+            showTypingIndicator();
+
+            // 呼叫深入追問 API
+            fetch("{% url 'courses:course_qa_clarify' course.pk %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    selected_text: selectedText,
+                    original_query: currentQuestion,
+                    original_context: currentAnswer
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                removeTypingIndicator();
+
+                // 顯示深入解釋
+                addMessage(data.clarification, 'ai');
+
+                // 啟用輸入
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                removeTypingIndicator();
+                addMessage('抱歉，無法獲取深入解釋：' + error.message, 'ai');
+
+                // 啟用輸入
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            });
         }
 
         // Enter 鍵發送 (Shift+Enter 換行)
         messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                chatForm.dispatchEvent(new Event('submit'));
+                handleSendMessage();
             }
         });
 
-        // 頁面載入時滾動到底部
-        window.addEventListener('load', scrollToBottom);
+        // 切換練習題答案顯示/隱藏
+        function toggleAnswer(answerId, buttonId) {
+            const answerDiv = document.getElementById(answerId);
+            const button = document.getElementById(buttonId);
+
+            if (answerDiv.style.display === 'none') {
+                // 顯示答案
+                answerDiv.style.display = 'block';
+                button.innerHTML = '<i class="bi bi-eye-slash"></i> 隱藏答案';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-outline-secondary');
+            } else {
+                // 隱藏答案
+                answerDiv.style.display = 'none';
+                button.innerHTML = '<i class="bi bi-eye"></i> 顯示答案';
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-outline-primary');
+            }
+        }
+
+        // 頁面載入時滾動到底部和渲染數學公式
+        window.addEventListener('load', function() {
+            scrollToBottom();
+
+            // 渲染頁面初始載入時的數學公式
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch((err) => {
+                    console.log('MathJax 初始渲染錯誤:', err);
+                });
+            }
+        });
     </script>
 {% endblock %}

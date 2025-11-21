@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "assessments",
     "enrollments",
     "core",
+    "chatbot"
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,199 @@
+{% extends "admin/change_list.html" %}
+{% load admin_urls admin_list i18n %}
+
+{% block content_title %}
+    <h1>選課審核 - 按分組顯示</h1>
+{% endblock %}
+
+{% block search %}
+{% endblock %}
+
+{% block date_hierarchy %}{% endblock %}
+
+{% block filters %}{% endblock %}
+
+{% block result_list %}
+<div id="result_list" style="margin: 20px 0;">
+    {% if pending_groups %}
+        <style>
+            .enrollment-group-table {
+                width: 100%;
+                border-collapse: collapse;
+                background-color: white;
+                border: 1px solid #ddd;
+            }
+            .enrollment-group-table thead th {
+                background-color: #417690;
+                color: white;
+                padding: 12px;
+                text-align: left;
+                font-weight: bold;
+                border: 1px solid #ddd;
+            }
+            .enrollment-group-table tbody tr {
+                border-bottom: 1px solid #ddd;
+            }
+            .enrollment-group-table tbody tr:hover {
+                background-color: #f5f5f5;
+            }
+            .enrollment-group-table td {
+                padding: 15px;
+                border: 1px solid #ddd;
+            }
+            .student-info {
+                font-weight: bold;
+                color: #333;
+            }
+            .student-email {
+                color: #999;
+                font-size: 0.9em;
+            }
+            .group-info {
+                font-weight: bold;
+                color: #333;
+            }
+            .course-count {
+                text-align: center;
+                font-weight: bold;
+                color: #0066cc;
+            }
+            .status-pending {
+                color: #ff9800;
+                font-weight: bold;
+            }
+            .action-buttons {
+                white-space: nowrap;
+            }
+            .action-buttons a {
+                display: inline-block;
+                padding: 8px 15px;
+                margin-right: 8px;
+                color: white;
+                text-decoration: none;
+                border-radius: 3px;
+                font-size: 0.9em;
+                font-weight: bold;
+            }
+            .btn-approve {
+                background-color: #28a745;
+                color: white !important;
+            }
+            .btn-approve:hover {
+                background-color: #218838;
+                color: white !important;
+            }
+            .btn-reject {
+                background-color: #dc3545;
+                color: white !important;
+            }
+            .btn-reject:hover {
+                background-color: #c82333;
+                color: white !important;
+            }
+            .course-details {
+                background-color: #f9f9f9;
+            }
+            .course-details-inner {
+                margin: 10px 0;
+                padding: 10px;
+                background-color: white;
+                border-left: 4px solid #0066cc;
+            }
+            .course-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            .course-list li {
+                padding: 5px 0;
+                border-bottom: 1px solid #eee;
+            }
+            .course-list li:last-child {
+                border-bottom: none;
+            }
+            .summary-box {
+                margin-top: 20px;
+                padding: 15px;
+                background-color: #e8f4f8;
+                border-left: 4px solid #0066cc;
+                font-weight: bold;
+                color: #0066cc;
+            }
+        </style>
+
+        <table class="enrollment-group-table">
+            <thead>
+                <tr>
+                    <th style="width: 180px;">學生</th>
+                    <th style="width: 150px;">申請分組</th>
+                    <th style="width: 100px;">課程數量</th>
+                    <th style="width: 80px;">狀態</th>
+                    <th style="width: 150px;">申請時間</th>
+                    <th style="width: 220px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in pending_groups %}
+                    <tr>
+                        <td>
+                            <div class="student-info">{{ group.student.username }}</div>
+                            <div class="student-email">{{ group.student.email }}</div>
+                        </td>
+                        <td>
+                            <div class="group-info">{{ group.grade }} - {{ group.subject.name }}</div>
+                        </td>
+                        <td>
+                            <div class="course-count">{{ group.enrollments|length }} 個課程</div>
+                        </td>
+                        <td>
+                            <span class="status-pending">⏳ 待審核</span>
+                        </td>
+                        <td>
+                            {{ group.sample_enrollment.enrolled_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'enrollments:approve_enrollment' group.sample_enrollment.id %}" 
+                                   class="btn-approve">
+                                    ✓ 核准全部
+                                </a>
+                                <a href="{% url 'enrollments:approve_enrollment' group.sample_enrollment.id %}?action=reject" 
+                                   class="btn-reject">
+                                    ✗ 拒絕全部
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- 課程詳情（可收起） -->
+                    <tr class="course-details">
+                        <td colspan="6">
+                            <details style="cursor: pointer;">
+                                <summary style="font-weight: bold; color: #666; user-select: none;">
+                                    📚 查看課程列表
+                                </summary>
+                                <div class="course-details-inner">
+                                    <ul class="course-list">
+                                        {% for enrollment in group.enrollments %}
+                                            <li>{{ enrollment.course.title }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </details>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="summary-box">
+            📊 共 {{ pending_groups|length }} 個待審核申請，涉及 {{ pending_count }} 個課程
+        </div>
+    {% else %}
+        <div style="padding: 40px; text-align: center; color: #999;">
+            <h3>✓ 目前沒有待審核的申請</h3>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block pagination %}{% endblock %}

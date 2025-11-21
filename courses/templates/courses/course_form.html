@@ -24,8 +24,12 @@
 <!-- 返回按鈕 -->
 <div class="mb-4">
     {% if form.instance.pk %}
-    <a href="{% url 'courses:course_detail' form.instance.pk %}" class="btn btn-outline-secondary">
+    <a href="{% url 'courses:teacher_course_list' %}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left"></i> 返回課程詳情
+    </a>
+    {% elif next_page == "teacher_course_list" %}
+    <a href="{% url 'courses:teacher_course_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> 返回課程管理
     </a>
     {% else %}
     <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">

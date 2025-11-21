@@ -1,0 +1,37 @@
+# FastAPI 核心依賴
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.2
+
+# RAG 相關依賴（已在你的 Rag_model.py 中使用）
+langchain==0.3.7
+langchain-community==0.3.5
+langchain-openai==0.2.5
+langchain-core==0.3.15
+
+# 向量資料庫和 Embeddings
+faiss-cpu==1.9.0  # 如果有 GPU: faiss-gpu==1.9.0
+sentence-transformers==3.3.1
+
+# HuggingFace 相關
+transformers==4.46.3
+# torch==2.5.1
+accelerate==1.1.1
+
+# OpenAI
+openai==1.54.4
+
+# 工具
+python-dotenv==1.0.1
+numpy==1.26.4
+
+# PDF 處理（如果需要）
+pypdf==5.1.0
+pdfplumber==0.11.4
+
+# CORS 支援（已包含在 fastapi 中）
+python-multipart==0.0.12
+
+# 其他可能需要的
+requests==2.32.3
+httpx==0.27.2

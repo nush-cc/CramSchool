@@ -1,25 +1,20 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User
-from courses.models import Grade, EducationLevel
+from courses.models import Grade
 
 
 class StudentRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True, label="電子郵件")
-    # grade = forms.ModelChoiceField(
-    #     queryset=Grade.objects.all(),
-    #     required=True,
-    #     label="年級",
-    # )
-    education_level = forms.ModelChoiceField(
-        queryset=EducationLevel.objects.all(),
+    grade = forms.ModelChoiceField(
+        queryset=Grade.objects.all(),
         required=True,
         label="年級",
     )
 
     class Meta:
         model = User
-        fields = ["username", "email", "password1", "password2", "education_level"]
+        fields = ["username", "email", "password1", "password2", "grade"]
         labels = {
             "username": "使用者名稱",
             "password1": "密碼",
