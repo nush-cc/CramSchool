@@ -26,6 +26,38 @@ load_dotenv(env_path)
 # 導入 RAG 相關模組
 from chatbot.rag_pipeline.RAG_function import rag_process
 
+def get_drawing_info(retrieved_docs):
+    import json
+    
+    # 路徑設定
+    DRAWING_DIR = os.path.join(project_root, "chatbot", "dataset", "llama_drawing_steps")
+    
+    for doc in retrieved_docs:
+        # 1. 從 FAISS Metadata 取得 ID
+        if hasattr(doc, "metadata"):
+            doc_id = doc.metadata.get("id") # 這裡拿到的是 "2907"
+            
+            if doc_id:
+                # 2. 拼湊檔名：目標是 "2907_layout.json"
+                # 注意：這裡要根據你的截圖調整，只找 _layout.json
+                target_filename = f"{doc_id}_layout.json"
+                full_path = os.path.join(DRAWING_DIR, target_filename)
+                
+                # 3. 檢查檔案是否存在
+                if os.path.exists(full_path):
+                    try:
+                        with open(full_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            # 計算總步數
+                            steps = len(data.get("steps", []))
+                            # 回傳 ID (2907) 和總步數
+                            return str(doc_id), steps
+                    except Exception as e:
+                        print(f"讀取 Layout JSON 失敗: {e}")
+                        continue
+                        
+    return None, 0
+
 # ==================== Pydantic Models ====================
 
 class ChatMessage(BaseModel):
@@ -91,6 +123,8 @@ class ChatResponse(BaseModel):
         default=None,
         description="練習題的答案部分（僅練習題模式，用於遮罩）"
     )
+    drawing_id: Optional[str] = Field(default=None, description="對應的畫圖 ID")
+    drawing_total_steps: int = Field(default=0, description="畫圖總步數")
 
 
 class ClarifyRequest(BaseModel):
@@ -325,6 +359,35 @@ async def chat(request: ChatRequest):
 
         retrieved_docs = retrieved.get(request.message, [])
 
+        # [新增] 檢查是否有畫圖 ID
+        drawing_id, total_steps = get_drawing_info(retrieved_docs)
+
+        if not drawing_id and request.search_type != "teaching": # 如果是純教學模式就不找
+            try:
+                # 專門針對練習題庫 (Exercise) 搜 1 筆
+                extra_retrieval = rag_service.retrival_step(
+                    [request.message],
+                    "exercise", # 強制搜練習題
+                    (rag_service.teaching_vs, rag_service.teaching_ds),
+                    (rag_service.exercise_vs, rag_service.exercise_ds),
+                    top_n=1,
+                    course_filter=None # 為了提高命中率，可以先不過濾課程
+                )
+                extra_docs = extra_retrieval.get(request.message, [])
+                
+                # 檢查這外搜出來的一題有沒有圖
+                extra_id, extra_steps = get_drawing_info(extra_docs)
+                
+                if extra_id:
+                    print(f"💡 [側面推薦] 主要回答沒圖，但從練習題庫找到了相關圖表 ID: {extra_id}")
+                    drawing_id = extra_id
+                    total_steps = extra_steps
+                    # 選擇性：你要不要把這題的題目/答案也覆蓋過去？
+                    # 如果你只想顯示圖，保留原本的回答，就這樣就好。
+                    # 如果你想讓 AI 順便提到這題，你可以把 extra_docs 加進 context。
+            except Exception as e:
+                print(f"側面推薦檢索失敗: {e}")
+
         # 2. 建立上下文
         matched_context = "\n".join([
             doc.page_content if hasattr(doc, "page_content") else str(doc)
@@ -391,7 +454,9 @@ async def chat(request: ChatRequest):
             search_type=request.search_type,
             learner_style=request.learner_style,
             exercise_question=exercise_question,
-            exercise_answer=exercise_answer
+            exercise_answer=exercise_answer,
+            drawing_id=drawing_id,          # 回傳 ID
+            drawing_total_steps=total_steps # 回傳總步數
         )
 
     except Exception as e:
@@ -449,6 +514,32 @@ async def chat_with_history(request: ChatRequest):
 
         retrieved_docs = retrieved.get(request.message, [])
 
+        # [新增] 檢查是否有畫圖 ID
+        drawing_id, total_steps = get_drawing_info(retrieved_docs)
+
+        # === [新增] 側面推薦邏輯 ===
+        if not drawing_id and request.search_type != "teaching":
+            try:
+                # 專門針對練習題庫 (Exercise) 搜 1 筆
+                extra_retrieval = rag_service.retrival_step(
+                    [request.message],
+                    "exercise", 
+                    (rag_service.teaching_vs, rag_service.teaching_ds),
+                    (rag_service.exercise_vs, rag_service.exercise_ds),
+                    top_n=1,
+                    course_filter=None # 不過濾課程以提高命中率
+                )
+                extra_docs = extra_retrieval.get(request.message, [])
+                
+                extra_id, extra_steps = get_drawing_info(extra_docs)
+                
+                if extra_id:
+                    print(f"💡 [側面推薦] 主要回答沒圖，但從練習題庫找到了相關圖表 ID: {extra_id}")
+                    drawing_id = extra_id
+                    total_steps = extra_steps
+            except Exception as e:
+                print(f"側面推薦檢索失敗: {e}")
+
         # 2. 建立上下文
         matched_context = "\n".join([
             doc.page_content if hasattr(doc, "page_content") else str(doc)
@@ -480,7 +571,7 @@ async def chat_with_history(request: ChatRequest):
             is_exercise_mode=is_exercise_mode,
             course_title=request.course_title,  # 傳遞課程標題
             use_alternative=request.use_alternative,  # 是否換角度
-            retry_count=request.retry_count  # 重試次數
+            retry_count=request.retry_count,  # 重試次數
         )
 
         # 5. 解析練習題的題目和答案（僅在練習題模式）
@@ -529,7 +620,9 @@ async def chat_with_history(request: ChatRequest):
             search_type=request.search_type,
             learner_style=request.learner_style,
             exercise_question=exercise_question,
-            exercise_answer=exercise_answer
+            exercise_answer=exercise_answer,
+            drawing_id=drawing_id,          # 回傳 ID
+            drawing_total_steps=total_steps # 回傳總步數
         )
 
     except Exception as e:

@@ -25,4 +25,5 @@ urlpatterns = [
         views.placement_test_submit,
         name="placement_test_submit",
     ),
+    path("api/drawing/<str:drawing_id>/<int:step>/", views.get_drawing_step_image, name="drawing_step_image"),
 ]

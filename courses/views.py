@@ -9,6 +9,12 @@ from .models import Course, Subject, Grade, Chapter
 from .forms import CourseForm
 from assessments.models import Question, Choice
 from enrollments.models import StudentAnswer, Enrollment
+from django.http import HttpResponse, Http404
+from chatbot.draw_package.drawing_engine import DrawingEngine
+import os
+import json
+from django.conf import settings
+import io
 
 LEVEL_STANDARDS = {
     (85, 100): "advanced",
@@ -668,6 +674,12 @@ def placement_test(request):
     # 獲取該學生的預先測驗課程
     course = get_student_placement_course(request.user)
 
+    LEVEL_MAP = {
+        "advanced": "進階級",
+        "standard": "標準級",
+        "basic": "基礎級",
+    }
+
     # 檢查學生是否已完成測驗
     if request.user.level and request.user.placement_test_completed_at:
         return render(
@@ -675,7 +687,7 @@ def placement_test(request):
             "courses/placement_test_already_done.html",
             {
                 "course": course,
-                "level": request.user.level,
+                "level": LEVEL_MAP[request.user.level],
                 "score": request.user.placement_test_score,
             },
         )
@@ -773,3 +785,66 @@ def placement_test_submit(request):
         return render(request, "courses/placement_test_result.html", context)
 
     return redirect("courses:placement_test")
+
+def get_drawing_step_image(request, drawing_id, step):
+    """
+    API: /courses/api/drawing/<drawing_id>/<step>/
+    功能: 讀取 {drawing_id}_layout.json，即時繪製第 step 步的圖片
+    """
+    
+    # 1. 定義路徑
+    BASE_DIR = settings.BASE_DIR
+    # 指向存放 json 的資料夾
+    DRAWING_DIR = os.path.join(BASE_DIR, "chatbot", "dataset", "llama_drawing_steps")
+    
+    # 2. 尋找 layout 檔案 (對應你的截圖檔名格式)
+    json_filename = f"{drawing_id}_layout.json" # 例如 2907_layout.json
+    json_path = os.path.join(DRAWING_DIR, json_filename)
+    
+    if not os.path.exists(json_path):
+        # 如果找不到，嘗試找沒有 _layout 後綴的 (以防萬一)
+        json_path = os.path.join(DRAWING_DIR, f"{drawing_id}.json")
+        if not os.path.exists(json_path):
+            raise Http404(f"找不到繪圖資料: {drawing_id}")
+
+    try:
+        # 3. 讀取 JSON
+        with open(json_path, 'r', encoding='utf-8') as f:
+            layout_data = json.load(f)
+
+        # 4. 初始化繪圖引擎
+        # 注意：這裡可以傳入 canvas_size，如果 json 裡有寫，就用 json 的，否則預設
+        width = 600
+        height = 400
+        if "canvas_size" in layout_data:
+            width, height = layout_data["canvas_size"]
+            
+        engine = DrawingEngine(width=width, height=height)
+        
+        # 5. 計算步驟 (前端傳 1-based，轉為 0-based)
+        try:
+            step_index = int(step) - 1
+        except ValueError:
+            step_index = 0
+            
+        if step_index < 0: step_index = 0
+        
+        # 確保不超過總步數
+        total_steps = len(layout_data.get("steps", []))
+        if step_index >= total_steps:
+            step_index = total_steps - 1
+        
+        # 6. 渲染圖片 (render_specific_step 會畫出 0 到 step_index 的所有內容)
+        pil_image = engine.render_specific_step(layout_data, step_index)
+        
+        # 7. 將圖片轉為 Bytes 回傳 (不存檔)
+        img_io = io.BytesIO()
+        pil_image.save(img_io, format='PNG')
+        img_io.seek(0)
+        
+        return HttpResponse(img_io, content_type="image/png")
+        
+    except Exception as e:
+        print(f"繪圖引擎錯誤: {e}")
+        # 在開發模式下，可以考慮回傳錯誤訊息圖片，這裡先回傳 404
+        raise Http404("Error generating image")

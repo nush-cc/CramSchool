@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import StudentRegisterForm, LoginForm
 from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.decorators import login_required
 
 
 def register(request):
@@ -33,3 +34,10 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('/')
+
+@login_required
+def account_settings(request):
+    """帳號設定/個人資料頁面"""
+    return render(request, 'users/account_settings.html', {
+        'user': request.user
+    })

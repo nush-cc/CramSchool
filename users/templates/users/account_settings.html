@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}帳號設定 - CramSchool{% endblock %}
+
+{% block page_title %}
+<i class="bi bi-person-circle text-primary"></i> 個人帳號設定
+{% endblock %}
+
+{% block page_subtitle %}查看您的帳號資訊與學習狀態{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-card-heading"></i> 基本資料
+                    </h5>
+                    <span
+                        class="badge {% if user.role == 'teacher' %}bg-success{% elif user.role == 'admin' %}bg-danger{% else %}bg-info{% endif %} rounded-pill px-3">
+                        {{ user.get_role_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4 text-center border-end">
+                        <div class="mb-3">
+                            <div class="avatar-placeholder bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                style="width: 100px; height: 100px;">
+                                <i class="bi bi-person-fill text-secondary" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                        <h5 class="fw-bold mb-1">{{ user.username }}</h5>
+                        <p class="text-muted small mb-2">加入時間：{{ user.date_joined|date:"Y/m/d" }}</p>
+                        <p class="text-muted small">上次登入：{{ user.last_login|date:"Y/m/d H:i" }}</p>
+                    </div>
+
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th width="30%" class="text-muted">電子郵件</th>
+                                    <td class="fw-medium">{{ user.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">電話號碼</th>
+                                    <td class="fw-medium">{{ user.phone|default:"未設定" }}</td>
+                                </tr>
+                                {% if user.role == 'student' %}
+                                <tr>
+                                    <th class="text-muted">所屬年級</th>
+                                    <td>
+                                        {% if user.grade %}
+                                        <span class="badge bg-secondary">{{ user.grade }}</span>
+                                        {% else %}
+                                        <span class="text-muted fst-italic">未分配</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if user.role == 'student' %}
+        <div class="card mb-4 shadow-sm border-info">
+            <div class="card-header bg-info text-white py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-mortarboard-fill"></i> 學習狀態
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="p-3 bg-light rounded h-100">
+                            <small class="text-muted d-block mb-2">分班等級</small>
+                            <h4 class="mb-0 text-primary fw-bold">
+                                {% if user.level %}
+                                {{ user.get_level_display }}
+                                {% else %}
+                                <span class="text-muted h6">未分班</span>
+                                {% endif %}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="p-3 bg-light rounded h-100">
+                            <small class="text-muted d-block mb-2">預先測驗成績</small>
+                            <h4 class="mb-0 text-success fw-bold">
+                                {% if user.placement_test_score is not None %}
+                                {{ user.placement_test_score|floatformat:1 }} <span class="fs-6">分</span>
+                                {% else %}
+                                <span class="text-muted h6">未測驗</span>
+                                {% endif %}
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded h-100">
+                            <small class="text-muted d-block mb-2">測驗完成時間</small>
+                            <div class="mb-0 text-dark fw-medium">
+                                {% if user.placement_test_completed_at %}
+                                {{ user.placement_test_completed_at|date:"Y/m/d" }}
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if not user.placement_test_completed_at %}
+                <div class="alert alert-warning mt-4 mb-0 d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                    <div>
+                        <strong>您尚未完成預先測驗！</strong>
+                        <p class="mb-0 small">請盡快完成測驗以進行分班與選課。</p>
+                    </div>
+                    <a href="{% url 'courses:placement_test' %}"
+                        class="btn btn-warning btn-sm ms-auto fw-bold text-dark">
+                        前往測驗
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% comment %}
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="card-title text-muted mb-3">帳號操作</h6>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" disabled>
+                        <i class="bi bi-pencil"></i> 編輯資料
+                    </button>
+                    <button class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-key"></i> 修改密碼
+                    </button>
+                </div>
+                <small class="text-muted mt-2 d-block">* 若需修改資料請洽詢管理員</small>
+            </div>
+        </div>
+        {% endcomment %}
+    </div>
+</div>
+{% endblock %}

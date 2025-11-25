@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css"
+        rel="stylesheet">
 
     <style>
         :root {
@@ -26,7 +28,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
         }
 
@@ -420,60 +423,66 @@
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body {% if user.is_authenticated %} class="has-sidebar"{% endif %}>
-<!-- 導航列 -->
-<nav class="navbar-custom">
-    {% if user.is_authenticated %}
+
+<body {% if user.is_authenticated %} class="has-sidebar" {% endif %}>
+    <!-- 導航列 -->
+    <nav class="navbar-custom">
+        {% if user.is_authenticated %}
         <button class="toggle-sidebar-btn" id="toggleSidebar" title="切換側邊欄">
             <i class="bi bi-list"></i>
         </button>
-    {% endif %}
-    <a class="navbar-brand" href="/">
-        <i class="bi bi-book"></i>
-        <span>CramSchool</span>
-    </a>
+        {% endif %}
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-book"></i>
+            <span>CramSchool</span>
+        </a>
 
-    <div class="ms-auto d-flex align-items-center gap-3">
-        <div class="d-none d-md-flex align-items-center user-info">
-            {% if user.is_authenticated %}
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <div class="d-none d-md-flex align-items-center user-info">
+                {% if user.is_authenticated %}
                 <div class="text-white" style="font-size: 0.9rem;">
                     <div style="font-weight: 500;">{{ user.username }}</div>
                     <div style="opacity: 0.8; font-size: 0.85rem;">
                         {% if user.role %}
-                            {{ user.get_role_display }}
+                        {{ user.get_role_display }}
                         {% else %}
-                            使用者
+                        使用者
                         {% endif %}
                     </div>
                 </div>
-            {% endif %}
-        </div>
+                {% endif %}
+            </div>
 
-        {% if user.is_authenticated %}
+            {% if user.is_authenticated %}
             <div class="dropdown user-dropdown">
-                <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
                     <i class="bi bi-person-circle"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/account/"><i class="bi bi-person"></i> 帳號設定</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> 登出</a></li>
+                    <li><a class="dropdown-item" href="{% url 'account_settings' %}"><i class="bi bi-person"></i>
+                            帳號設定</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> 登出</a>
+                    </li>
                 </ul>
             </div>
-        {% else %}
+            {% else %}
             <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-box-arrow-in-right"></i> 登入
             </a>
             <a href="{% url 'register' %}" class="btn btn-outline-light btn-sm">
                 <i class="bi bi-box-arrow-in-right"></i> 註冊
             </a>
-        {% endif %}
-    </div>
-</nav>
+            {% endif %}
+        </div>
+    </nav>
 
-<!-- 側邊欄 -->
+    <!-- 側邊欄 -->
 
-{% if user.is_authenticated %}
+    {% if user.is_authenticated %}
     <aside class="sidebar collapsed" id="sidebar">
         <ul class="sidebar-menu">
             <li class="sidebar-menu-item">
@@ -484,39 +493,39 @@
             </li>
 
             {% if user.role == 'teacher' or user.role == 'admin' %}
-                <!-- 老師/管理員菜單 -->
-                <li class="sidebar-menu-item">
-                    <a href="{% url 'courses:teacher_course_list' %}" class="sidebar-menu-link">
-                        <i class="bi bi-pencil-square"></i>
-                        <span class="menu-text">課程管理</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{% url 'enrollments:teacher_approval_list' %}" class="sidebar-menu-link">
-                        <i class="bi bi-check2-square"></i>
-                        <span class="menu-text">核准管理</span>
-                    </a>
-                </li>
+            <!-- 老師/管理員菜單 -->
+            <li class="sidebar-menu-item">
+                <a href="{% url 'courses:teacher_course_list' %}" class="sidebar-menu-link">
+                    <i class="bi bi-pencil-square"></i>
+                    <span class="menu-text">課程管理</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'enrollments:teacher_approval_list' %}" class="sidebar-menu-link">
+                    <i class="bi bi-check2-square"></i>
+                    <span class="menu-text">核准管理</span>
+                </a>
+            </li>
             {% else %}
-                <!-- 學生菜單 -->
-                <li class="sidebar-menu-item">
-                    <a href="{% url 'courses:placement_test' %}" class="sidebar-menu-link">
-                        <i class="bi bi-pencil-square"></i>
-                        <span class="menu-text">預先測驗</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{% url 'courses:course_list' %}" class="sidebar-menu-link">
-                        <i class="bi bi-book"></i>
-                        <span class="menu-text">課程</span>
-                    </a>
-                </li>
-                <li class="sidebar-menu-item">
-                    <a href="{% url 'enrollments:enrollment_list' %}" class="sidebar-menu-link">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span class="menu-text">報名</span>
-                    </a>
-                </li>
+            <!-- 學生菜單 -->
+            <li class="sidebar-menu-item">
+                <a href="{% url 'courses:placement_test' %}" class="sidebar-menu-link">
+                    <i class="bi bi-pencil-square"></i>
+                    <span class="menu-text">預先測驗</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'courses:course_list' %}" class="sidebar-menu-link">
+                    <i class="bi bi-book"></i>
+                    <span class="menu-text">課程</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'enrollments:enrollment_list' %}" class="sidebar-menu-link">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="menu-text">報名</span>
+                </a>
+            </li>
             {% endif %}
             {% comment %} <li class="sidebar-menu-item">
                 <a href="/users/" class="sidebar-menu-link">
@@ -526,86 +535,87 @@
             </li> {% endcomment %}
         </ul>
     </aside>
-{% endif %}
+    {% endif %}
 
-<!-- 主內容 -->
-<div class="main-wrapper sidebar-collapsed" id="mainwrapper">
-    <div class="main-content">
-        {% block page_header %}
+    <!-- 主內容 -->
+    <div class="main-wrapper sidebar-collapsed" id="mainwrapper">
+        <div class="main-content">
+            {% block page_header %}
             <div class="page-header">
                 <h1 class="page-title">{% block page_title %}歡迎{% endblock %}</h1>
                 <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
             </div>
-        {% endblock %}
+            {% endblock %}
 
-        {% block content %}
+            {% block content %}
             <div class="card">
                 <div class="card-body">
                     <p class="text-muted">頁面內容將在這裡顯示...</p>
                 </div>
             </div>
-        {% endblock %}
+            {% endblock %}
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2025 CramSchool. 版權所有。</p>
+        </footer>
     </div>
 
-    <footer class="footer">
-        <p>&copy; 2025 CramSchool. 版權所有。</p>
-    </footer>
-</div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-<!-- Bootstrap JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 側邊欄切換
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const mainWrapper = document.getElementById('mainwrapper');
 
-<script>
-    // 側邊欄切換
-    const toggleBtn = document.getElementById('toggleSidebar');
-    const sidebar = document.getElementById('sidebar');
-    const mainWrapper = document.getElementById('mainwrapper');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.toggle('collapsed');
+                    mainWrapper.classList.toggle('sidebar-collapsed');
+                } else {
+                    sidebar.classList.toggle('open');
+                }
+            });
+        }
 
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            if (window.innerWidth > 768) {
-                sidebar.classList.toggle('collapsed');
-                mainWrapper.classList.toggle('sidebar-collapsed');
-            } else {
-                sidebar.classList.toggle('open');
-            }
+        // 手機版點擊菜單時自動關閉側邊欄
+        document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768 && sidebar) {
+                    sidebar.classList.remove('open');
+                }
+            });
         });
-    }
 
-    // 手機版點擊菜單時自動關閉側邊欄
-    document.querySelectorAll('.sidebar-menu-link').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768 && sidebar) {
+        // 窗口大小改變時的處理
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && sidebar) {
                 sidebar.classList.remove('open');
             }
         });
-    });
 
-    // 窗口大小改變時的處理
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768 && sidebar) {
-            sidebar.classList.remove('open');
-        }
-    });
+        // 標記當前頁面的菜單項
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar-menu-link').forEach(link => {
+            link.classList.remove('active'); // 先移除所有 active
 
-    // 標記當前頁面的菜單項
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.sidebar-menu-link').forEach(link => {
-        link.classList.remove('active'); // 先移除所有 active
+            const href = link.getAttribute('href');
 
-        const href = link.getAttribute('href');
-
-        if (href === '/') {
-            // 首頁只在完全匹配時才標記
-            if (currentPath === '/' || currentPath === '') {
+            if (href === '/') {
+                // 首頁只在完全匹配時才標記
+                if (currentPath === '/' || currentPath === '') {
+                    link.classList.add('active');
+                }
+            } else if (currentPath.startsWith(href)) {
+                // 其他頁面使用開頭匹配
                 link.classList.add('active');
             }
-        } else if (currentPath.startsWith(href)) {
-            // 其他頁面使用開頭匹配
-            link.classList.add('active');
-        }
-    });
-</script>
-{% block extra_js %}{% endblock %}
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
+
 </html>
