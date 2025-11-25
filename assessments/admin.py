@@ -101,6 +101,7 @@ class QuestionAdmin(admin.ModelAdmin):
         )
 
     stats_display.short_description = "正確率"
+    stats_display.admin_order_field = '-correct_rate'
 
     def changelist_view(self, request, extra_context=None):
         """覆蓋 changelist_view 來新增統計摘要"""
