@@ -1,0 +1,33 @@
+[project]
+name = "cram"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "asgiref==3.10.0",
+    "django==5.2.8",
+    "django-jazzmin==3.0.1",
+    "dotenv==0.9.9",
+    "greenlet==3.2.4",
+    "playwright==1.55.0",
+    "psycopg2-binary==2.9.11",
+    "pyee==13.0.0",
+    "python-dotenv==1.2.1",
+    "sqlparse==0.5.3",
+    "torch==2.5.1",
+    "torchaudio==2.5.1",
+    "torchvision==0.20.1",
+    "typing-extensions==4.15.0",
+    "tzdata==2025.2",
+]
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+torchaudio = { index = "pytorch" }
