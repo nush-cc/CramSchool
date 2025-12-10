@@ -53,4 +53,6 @@ chatbot/faiss_index_exercise/*.faiss
 chatbot/faiss_index_exercise/*.pkl
 chatbot/faiss_index_teaching/*.faiss
 chatbot/faiss_index_teaching/*.pkl
+chatbot/faiss_index_science_exercise/
+chatbot/faiss_index_science_teaching/
 chatbot/config.py

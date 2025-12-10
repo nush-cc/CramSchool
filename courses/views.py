@@ -352,22 +352,35 @@ def course_qa_chat(request, pk):
     course = get_object_or_404(Course, pk=pk, is_active=True)
 
     # 取得使用者的等級
-    user_level_code = 'standard'  # 預設標準級
-    user_level_display = '標準級'
+    user_level_code = "standard"
+    user_level_display = "標準級"
 
     if request.user.is_authenticated and request.user.level:
-        user_level_code = request.user.level  # advanced/standard/basic
+        user_level_code = request.user.level
         level_map = {
-            'advanced': '進階級',
-            'standard': '標準級',
-            'basic': '基礎級',
+            "advanced": "進階級",
+            "standard": "標準級",
+            "basic": "基礎級",
         }
-        user_level_display = level_map.get(user_level_code, '標準級')
+        user_level_display = level_map.get(user_level_code, "標準級")
+
+    # === [新增] 判斷科目邏輯 ===
+    rag_subject = "math"
+    subj_name = course.subject.name
+    if (
+        "自然" in subj_name
+        or "理化" in subj_name
+        or "生物" in subj_name
+        or "地科" in subj_name
+    ):
+        rag_subject = "science"
+    # =========================
 
     context = {
         "course": course,
-        "user_level_code": user_level_code,        # 傳給 JS 用
-        "user_level_display": user_level_display,  # 顯示用
+        "user_level_code": user_level_code,
+        "user_level_display": user_level_display,
+        "rag_subject": rag_subject,  # <--- 傳入 Context
     }
 
     return render(request, "courses/course_qa_chat.html", context)
@@ -378,7 +391,7 @@ def course_qa_chat(request, pk):
 def course_qa_api(request, pk):
     """
     課程 AI 問答 API - 呼叫 FastAPI RAG 服務
-    接收前端問題，轉發給 FastAPI，返回答案
+    接收前端問題，由後端判斷科目後轉發給 FastAPI，返回答案
     """
     import requests
     import json
@@ -389,52 +402,69 @@ def course_qa_api(request, pk):
     try:
         # 從請求中獲取資料
         data = json.loads(request.body)
-        message = data.get('message', '').strip()
-        history = data.get('history', [])
-        search_type = data.get('search_type', 'teaching')
+        message = data.get("message", "").strip()
+        history = data.get("history", [])
+        search_type = data.get("search_type", "teaching")
 
         # 獲取重試相關參數
-        is_retry = data.get('is_retry', False)
-        retry_count = data.get('retry_count', 0)
-        use_alternative = data.get('use_alternative', False)
+        is_retry = data.get("is_retry", False)
+        retry_count = data.get("retry_count", 0)
+        use_alternative = data.get("use_alternative", False)
 
         if not message:
-            return JsonResponse({'error': '問題不能為空'}, status=400)
+            return JsonResponse({"error": "問題不能為空"}, status=400)
 
         # 決定學習風格（優先使用前端傳來的，否則使用學生等級）
-        learner_style = data.get('learner_style', None)
+        learner_style = data.get("learner_style", None)
 
         if not learner_style:
             # 如果前端沒有傳 learner_style，使用學生的預設等級
             learner_style_map = {
-                'advanced': '進階級',
-                'standard': '標準級',
-                'basic': '基礎級',
+                "advanced": "進階級",
+                "standard": "標準級",
+                "basic": "基礎級",
             }
             learner_style = learner_style_map.get(
-                request.user.level if hasattr(request.user, 'level') and request.user.level else 'standard',
-                '標準級'
+                request.user.level
+                if hasattr(request.user, "level") and request.user.level
+                else "standard",
+                "標準級",
             )
 
+        # === [關鍵修改] 自動判斷科目 ===
+        # 預設為數學
+        current_subject = "math"
+        subj_name = course.subject.name
+        # 如果科目名稱包含自然相關關鍵字，切換為 science
+        if any(
+            keyword in subj_name
+            for keyword in ["自然", "理化", "生物", "地科", "物理", "化學"]
+        ):
+            current_subject = "science"
+        # ============================
+
         # 準備送給 FastAPI 的payload
-        fastapi_url = 'http://localhost:8001/chat_with_history'
+        # 注意：請確認你的 FastAPI 服務位址正確 (預設為 8001)
+        fastapi_url = "http://localhost:8001/chat_with_history"
+
         payload = {
-            'message': message,
-            'search_type': search_type,
-            'learner_style': learner_style,
-            'course_id': pk,
-            'course_title': course.title,
-            'history': history,
-            'is_retry': is_retry,
-            'retry_count': retry_count,
-            'use_alternative': use_alternative
+            "message": message,
+            "subject": current_subject,  # <--- 傳送科目給 FastAPI
+            "search_type": search_type,
+            "learner_style": learner_style,
+            "course_id": pk,
+            "course_title": course.title,
+            "history": history,
+            "is_retry": is_retry,
+            "retry_count": retry_count,
+            "use_alternative": use_alternative,
         }
 
         # 呼叫 FastAPI
         response = requests.post(
             fastapi_url,
             json=payload,
-            timeout=60  # 60秒 timeout
+            timeout=60,  # 60秒 timeout
         )
 
         if response.status_code == 200:
@@ -444,20 +474,22 @@ def course_qa_api(request, pk):
             error_msg = f"FastAPI 回應錯誤: {response.status_code}"
             try:
                 error_detail = response.json()
-                error_msg = error_detail.get('detail', error_msg)
+                error_msg = error_detail.get("detail", error_msg)
             except Exception:
                 pass
 
-            return JsonResponse({'error': error_msg}, status=500)
+            return JsonResponse({"error": error_msg}, status=500)
 
     except requests.Timeout:
-        return JsonResponse({'error': 'AI 服務回應超時，請稍後再試'}, status=504)
+        return JsonResponse({"error": "AI 服務回應超時，請稍後再試"}, status=504)
     except requests.ConnectionError:
-        return JsonResponse({'error': '無法連接到 AI 服務，請確認服務是否啟動'}, status=503)
+        return JsonResponse(
+            {"error": "無法連接到 AI 服務，請確認服務是否啟動"}, status=503
+        )
     except json.JSONDecodeError:
-        return JsonResponse({'error': '請求格式錯誤'}, status=400)
+        return JsonResponse({"error": "請求格式錯誤"}, status=400)
     except Exception as e:
-        return JsonResponse({'error': f'發生錯誤: {str(e)}'}, status=500)
+        return JsonResponse({"error": f"發生錯誤: {str(e)}"}, status=500)
 
 
 @login_required(login_url="login")
@@ -475,38 +507,36 @@ def course_qa_clarify(request, pk):
 
     try:
         data = json.loads(request.body)
-        selected_text = data.get('selected_text', '').strip()
-        original_query = data.get('original_query', '').strip()
-        original_context = data.get('original_context', '')
+        selected_text = data.get("selected_text", "").strip()
+        original_query = data.get("original_query", "").strip()
+        original_context = data.get("original_context", "")
 
         if not selected_text or not original_query:
-            return JsonResponse({'error': '缺少必要參數'}, status=400)
+            return JsonResponse({"error": "缺少必要參數"}, status=400)
 
         # 決定學習風格
         learner_style_map = {
-            'A': '進階級',
-            'B': '標準級',
-            'C': '基礎級',
+            "A": "進階級",
+            "B": "標準級",
+            "C": "基礎級",
         }
         learner_style = learner_style_map.get(
-            request.user.level if hasattr(request.user, 'level') and request.user.level else 'B',
-            '標準級'
+            request.user.level
+            if hasattr(request.user, "level") and request.user.level
+            else "B",
+            "標準級",
         )
 
         # 呼叫 FastAPI clarify endpoint
-        fastapi_url = 'http://localhost:8001/clarify'
+        fastapi_url = "http://localhost:8001/clarify"
         payload = {
-            'selected_text': selected_text,
-            'original_query': original_query,
-            'learner_style': learner_style,
-            'original_context': original_context
+            "selected_text": selected_text,
+            "original_query": original_query,
+            "learner_style": learner_style,
+            "original_context": original_context,
         }
 
-        response = requests.post(
-            fastapi_url,
-            json=payload,
-            timeout=60
-        )
+        response = requests.post(fastapi_url, json=payload, timeout=60)
 
         if response.status_code == 200:
             result = response.json()
@@ -515,20 +545,20 @@ def course_qa_clarify(request, pk):
             error_msg = f"FastAPI 回應錯誤: {response.status_code}"
             try:
                 error_detail = response.json()
-                error_msg = error_detail.get('detail', error_msg)
+                error_msg = error_detail.get("detail", error_msg)
             except Exception:
                 pass
 
-            return JsonResponse({'error': error_msg}, status=500)
+            return JsonResponse({"error": error_msg}, status=500)
 
     except requests.Timeout:
-        return JsonResponse({'error': 'AI 服務回應超時，請稍後再試'}, status=504)
+        return JsonResponse({"error": "AI 服務回應超時，請稍後再試"}, status=504)
     except requests.ConnectionError:
-        return JsonResponse({'error': '無法連接到 AI 服務'}, status=503)
+        return JsonResponse({"error": "無法連接到 AI 服務"}, status=503)
     except json.JSONDecodeError:
-        return JsonResponse({'error': '請求格式錯誤'}, status=400)
+        return JsonResponse({"error": "請求格式錯誤"}, status=400)
     except Exception as e:
-        return JsonResponse({'error': f'發生錯誤: {str(e)}'}, status=500)
+        return JsonResponse({"error": f"發生錯誤: {str(e)}"}, status=500)
 
 
 @login_required(login_url="login")
@@ -786,21 +816,22 @@ def placement_test_submit(request):
 
     return redirect("courses:placement_test")
 
+
 def get_drawing_step_image(request, drawing_id, step):
     """
     API: /courses/api/drawing/<drawing_id>/<step>/
     功能: 讀取 {drawing_id}_layout.json，即時繪製第 step 步的圖片
     """
-    
+
     # 1. 定義路徑
     BASE_DIR = settings.BASE_DIR
     # 指向存放 json 的資料夾
     DRAWING_DIR = os.path.join(BASE_DIR, "chatbot", "dataset", "llama_drawing_steps")
-    
+
     # 2. 尋找 layout 檔案 (對應你的截圖檔名格式)
-    json_filename = f"{drawing_id}_layout.json" # 例如 2907_layout.json
+    json_filename = f"{drawing_id}_layout.json"  # 例如 2907_layout.json
     json_path = os.path.join(DRAWING_DIR, json_filename)
-    
+
     if not os.path.exists(json_path):
         # 如果找不到，嘗試找沒有 _layout 後綴的 (以防萬一)
         json_path = os.path.join(DRAWING_DIR, f"{drawing_id}.json")
@@ -809,7 +840,7 @@ def get_drawing_step_image(request, drawing_id, step):
 
     try:
         # 3. 讀取 JSON
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             layout_data = json.load(f)
 
         # 4. 初始化繪圖引擎
@@ -818,32 +849,33 @@ def get_drawing_step_image(request, drawing_id, step):
         height = 400
         if "canvas_size" in layout_data:
             width, height = layout_data["canvas_size"]
-            
+
         engine = DrawingEngine(width=width, height=height)
-        
+
         # 5. 計算步驟 (前端傳 1-based，轉為 0-based)
         try:
             step_index = int(step) - 1
         except ValueError:
             step_index = 0
-            
-        if step_index < 0: step_index = 0
-        
+
+        if step_index < 0:
+            step_index = 0
+
         # 確保不超過總步數
         total_steps = len(layout_data.get("steps", []))
         if step_index >= total_steps:
             step_index = total_steps - 1
-        
+
         # 6. 渲染圖片 (render_specific_step 會畫出 0 到 step_index 的所有內容)
         pil_image = engine.render_specific_step(layout_data, step_index)
-        
+
         # 7. 將圖片轉為 Bytes 回傳 (不存檔)
         img_io = io.BytesIO()
-        pil_image.save(img_io, format='PNG')
+        pil_image.save(img_io, format="PNG")
         img_io.seek(0)
-        
+
         return HttpResponse(img_io, content_type="image/png")
-        
+
     except Exception as e:
         print(f"繪圖引擎錯誤: {e}")
         # 在開發模式下，可以考慮回傳錯誤訊息圖片，這裡先回傳 404

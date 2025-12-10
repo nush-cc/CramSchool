@@ -13,46 +13,32 @@ except ImportError as e:
     print(f"錯誤訊息: {e}")
     sys.exit(1)
 
+# 多學科配置設定
+SUBJECT_CONFIG = {
+    "math": {
+        "teaching_dir": "handouts_data",  # 數學講義資料夾
+        "exercise_file": "question_math_id.json",  # 數學題目檔名
+        "save_path_teaching": "faiss_index_teaching",
+        "save_path_exercise": "faiss_index_exercise",
+    },
+    "science": {
+        "teaching_dir": "handouts_science",  # 自然講義資料夾
+        "exercise_file": "question_science_id.json",  # 自然題目檔名
+        "save_path_teaching": "faiss_index_science_teaching",
+        "save_path_exercise": "faiss_index_science_exercise",
+    },
+}
+
+
 def main():
     print("=" * 60)
-    print("🚀 開始重建 FAISS 向量資料庫")
+    print("🚀 開始多學科 FAISS 向量資料庫建置")
     print("=" * 60)
 
-    # 1. 設定路徑
+    # 1. 設定基礎路徑
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    chatbot_dir = os.path.join(base_dir, 'chatbot')
-    
-    # 資料來源路徑
-    teaching_data_dir = os.path.join(chatbot_dir, 'dataset', 'handouts_data')
-    exercise_data_path = os.path.join(chatbot_dir, 'dataset', 'raw_data', 'add_id_data', 'question_math_id.json')
-    
-    # 輸出路徑 (FAISS index)
-    faiss_teaching_path = os.path.join(chatbot_dir, 'faiss_index_teaching')
-    faiss_exercise_path = os.path.join(chatbot_dir, 'faiss_index_exercise')
-
-    # 2. 檢查資料是否存在
-    if not os.path.exists(teaching_data_dir):
-        print(f"❌ 找不到教學資料目錄: {teaching_data_dir}")
-        return
-    
-    if not os.path.exists(exercise_data_path):
-        print(f"❌ 找不到練習題 JSON: {exercise_data_path}")
-        return
-
-    # 蒐集所有 PDF 檔案路徑
-    pdf_files = glob.glob(os.path.join(teaching_data_dir, "*.pdf"))
-    print(f"📚 找到 {len(pdf_files)} 個教學 PDF 檔案")
-    print(f"📝 練習題資料: {os.path.basename(exercise_data_path)}")
-
-    # 3. 刪除舊的向量資料庫 (強制重建)
-    print("\n🧹 清理舊的向量資料庫...")
-    if os.path.exists(faiss_teaching_path):
-        shutil.rmtree(faiss_teaching_path)
-        print(f"   已刪除: {faiss_teaching_path}")
-    
-    if os.path.exists(faiss_exercise_path):
-        shutil.rmtree(faiss_exercise_path)
-        print(f"   已刪除: {faiss_exercise_path}")
+    chatbot_dir = os.path.join(base_dir, "chatbot")
+    dataset_root = os.path.join(chatbot_dir, "dataset")
 
     # 4. 初始化 RAG 處理器
     print("\n⚙️ 初始化 RAG 處理器...")
@@ -63,22 +49,66 @@ def main():
     try:
         print("\n🔄 切換工作目錄至 chatbot 資料夾以進行儲存...")
         os.chdir(chatbot_dir)
-        
-        print("⚡ 開始建立索引 (這可能需要一點時間)...")
-        # 注意：RAG_function 會自動讀取我們刪除後留下的空位並建立新的
-        rag.vectorize_workflow(pdf_files, exercise_data_path)
-        
-        print("\n✅ 向量資料庫重建完成！")
-        print(f"   教學庫位置: {os.path.abspath('faiss_index_teaching')}")
-        print(f"   練習庫位置: {os.path.abspath('faiss_index_exercise')}")
+
+        # 迴圈處理每個科目
+        for subject, config in SUBJECT_CONFIG.items():
+            print(f"\n\n>>> 正在處理科目: [{subject.upper()}]")
+
+            # 組合完整路徑
+            teaching_data_dir = os.path.join(dataset_root, config["teaching_dir"])
+            exercise_data_path = os.path.join(
+                dataset_root, "raw_data", "add_id_data", config["exercise_file"]
+            )
+
+            # 輸出路徑
+            faiss_teaching_path = config["save_path_teaching"]
+            faiss_exercise_path = config["save_path_exercise"]
+
+            # 檢查資料是否存在
+            if not os.path.exists(teaching_data_dir):
+                print(f"  ⚠️ 跳過: 找不到教學資料目錄 {teaching_data_dir}")
+                continue
+            if not os.path.exists(exercise_data_path):
+                print(f"  ⚠️ 跳過: 找不到練習題 JSON {exercise_data_path}")
+                continue
+
+            # 蒐集所有 PDF 檔案路徑
+            pdf_files = glob.glob(os.path.join(teaching_data_dir, "*.pdf"))
+            print(f"  📚 找到 {len(pdf_files)} 個教學 PDF 檔案")
+            print(f"  📝 練習題資料: {os.path.basename(exercise_data_path)}")
+
+            # 刪除舊的向量資料庫 (強制重建)
+            print(f"  🧹 清理舊的 {subject} 向量資料庫...")
+            if os.path.exists(faiss_teaching_path):
+                shutil.rmtree(faiss_teaching_path)
+                print(f"   已刪除: {faiss_teaching_path}")
+
+            if os.path.exists(faiss_exercise_path):
+                shutil.rmtree(faiss_exercise_path)
+                print(f"   已刪除: {faiss_exercise_path}")
+
+            print(f"  ⚡ 開始建立 {subject.upper()} 索引 (這可能需要一點時間)...")
+
+            # 呼叫向量化流程，傳入自訂儲存路徑
+            rag.vectorize_workflow(
+                pdf_files,
+                exercise_data_path,
+                save_path_teaching=faiss_teaching_path,
+                save_path_exercise=faiss_exercise_path,
+            )
+
+            print(f"  ✅ {subject.upper()} 資料庫重建完成！")
+            print(f"   位置: {os.path.abspath(faiss_teaching_path)}")
 
     except Exception as e:
         print(f"\n❌ 發生錯誤: {str(e)}")
         import traceback
+
         traceback.print_exc()
     finally:
         # 恢復工作目錄
         os.chdir(original_cwd)
+
 
 if __name__ == "__main__":
     main()
