@@ -3,124 +3,121 @@
 {% block title %}AI 問答 - {{ course.title }} - CramSchool{% endblock %}
 
 {% block page_header %}
-<!-- 自定義頁面標題 -->
-<div class="page-header mb-0 pb-3 border-bottom">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="page-title mb-2">
-                <i class="bi bi-chat-dots text-info"></i> AI 問答助手
-            </h1>
-            <p class="page-subtitle mb-0">{{ course.title }} - {{ course.grade }}</p>
-        </div>
-        <div>
-            <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary">
-                <i class="bi bi-x-lg"></i> 結束問答
-            </a>
+    <div class="page-header mb-0 pb-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title mb-2">
+                    <i class="bi bi-chat-dots text-info"></i> AI 問答助手
+                </h1>
+                <p class="page-subtitle mb-0">{{ course.title }} - {{ course.grade }}</p>
+            </div>
+            <div>
+                <a href="{% url 'courses:course_detail' course.pk %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i> 結束問答
+                </a>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block content %}
-<div class="chat-container-wrapper">
-    <div class="row g-3">
-        <!-- 左側：聊天視窗 -->
-        <div class="col-lg-9">
-            <div class="card chat-card shadow-lg">
-                <!-- 聊天訊息區域 -->
-                <div class="card-body chat-messages" id="chatMessages">
-                    <!-- 歡迎訊息 -->
-                    <div class="message-wrapper ai-message">
-                        <div class="message-avatar">
-                            <i class="bi bi-robot"></i>
-                        </div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">AI 助教</span>
-                                <span class="message-time">剛剛</span>
+    <div class="chat-container-wrapper">
+        <div class="row g-3">
+            <div class="col-lg-9">
+                <div class="card chat-card shadow-lg">
+                    <div class="card-body chat-messages" id="chatMessages">
+                        <div class="message-wrapper ai-message">
+                            <div class="message-avatar">
+                                <i class="bi bi-robot"></i>
                             </div>
-                            <div class="message-bubble ai">
-                                <p class="mb-2">👋 你好！我是你的 AI 學習助教。</p>
-                                <p class="mb-0">我可以幫你解答關於「{{ course.title }}」的任何問題。請隨時向我提問！</p>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-sender">AI 助教</span>
+                                    <span class="message-time">剛剛</span>
+                                </div>
+                                <div class="message-bubble ai">
+                                    <p class="mb-2">👋 你好！我是你的 AI 學習助教。</p>
+                                    <p class="mb-0">我可以幫你解答關於「{{ course.title }}」的任何問題。請隨時向我提問！</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- 輸入區域 -->
-                <div class="card-footer chat-input-area">
-                    <form id="chatForm" class="d-flex gap-2 align-items-end" onsubmit="return false;">
-                        <div class="flex-grow-1">
+                    <div class="card-footer chat-input-area">
+                        <form id="chatForm" class="d-flex gap-2 align-items-end" onsubmit="return false;">
+                            <div class="flex-grow-1">
                             <textarea class="form-control chat-input" id="messageInput" rows="1"
-                                placeholder="輸入你的問題... (Enter 發送，Shift+Enter 換行)" required></textarea>
-                        </div>
-                        <button type="button" class="btn btn-primary btn-send" id="sendButton">
-                            <i class="bi bi-send-fill"></i>
-                            <span class="ms-2 d-none d-sm-inline">發送</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- 右側：快速操作 -->
-        <div class="col-lg-3">
-            <!-- 範例題目 -->
-            <div class="card shadow-sm mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-question-circle"></i> 範例題目
-                    </h6>
-                </div>
-                <div class="card-body p-2">
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個基礎題目來練習"
-                            data-search-type="exercise">
-                            <i class="bi bi-1-circle"></i> 基礎題目
-                        </button>
-                        <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個進階題目來挑戰"
-                            data-search-type="exercise">
-                            <i class="bi bi-2-circle"></i> 進階題目
-                        </button>
-                        <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個應用題來練習"
-                            data-search-type="exercise">
-                            <i class="bi bi-3-circle"></i> 應用題目
-                        </button>
-                        <button class="btn btn-sm btn-outline-primary quick-question-btn" data-question="請給我一個綜合題目"
-                            data-search-type="exercise">
-                            <i class="bi bi-star"></i> 綜合題目
-                        </button>
+                                      placeholder="輸入你的問題... (Enter 發送，Shift+Enter 換行)" required></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-send" id="sendButton">
+                                <i class="bi bi-send-fill"></i>
+                                <span class="ms-2 d-none d-sm-inline">發送</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- 學習等級顯示 -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-speedometer2"></i> 你的學習等級
-                    </h6>
+            <div class="col-lg-3">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-question-circle"></i> 範例題目
+                        </h6>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個基礎題目來練習"
+                                    data-search-type="exercise">
+                                <i class="bi bi-1-circle"></i> 基礎題目
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個進階題目來挑戰"
+                                    data-search-type="exercise">
+                                <i class="bi bi-2-circle"></i> 進階題目
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個應用題來練習"
+                                    data-search-type="exercise">
+                                <i class="bi bi-3-circle"></i> 應用題目
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
+                                    data-question="請給我一個綜合題目"
+                                    data-search-type="exercise">
+                                <i class="bi bi-star"></i> 綜合題目
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body text-center p-3">
-                    <div class="level-badge-display mb-2">
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-speedometer2"></i> 你的學習等級
+                        </h6>
+                    </div>
+                    <div class="card-body text-center p-3">
+                        <div class="level-badge-display mb-2">
                         <span class="badge badge-level-{{ user_level_code }} fs-6">
                             {{ user_level_display }}
                         </span>
+                        </div>
+                        <small class="text-muted d-block">
+                            AI 會根據你的等級調整解釋方式
+                        </small>
+                        <hr class="my-2">
+                        <small class="text-muted d-block">
+                            <i class="bi bi-info-circle"></i> 如果不懂，可以點擊回答下方的「我還是不懂」按鈕，AI 會降低難度重新解釋
+                        </small>
                     </div>
-                    <small class="text-muted d-block">
-                        AI 會根據你的等級調整解釋方式
-                    </small>
-                    <hr class="my-2">
-                    <small class="text-muted d-block">
-                        <i class="bi bi-info-circle"></i> 如果不懂，可以點擊回答下方的「我還是不懂」按鈕，AI 會降低難度重新解釋
-                    </small>
                 </div>
             </div>
         </div>
     </div>
-    {% endblock %}
+{% endblock %}
 
-    {% block extra_css %}
+{% block extra_css %}
     <style>
         /* 聊天容器 */
         .chat-container-wrapper {
@@ -606,11 +603,23 @@
         .math-placeholder:hover {
             background-color: #fde68a;
         }
-    </style>
-    {% endblock %}
 
-    {% block extra_js %}
-    <!-- MathJax 數學公式渲染 -->
+        /* 外部連結卡片樣式 */
+        .simulation-container {
+            border-left: 4px solid #0dcaf0;
+            /* Info color */
+            background-color: #f0faff;
+            transition: transform 0.2s;
+        }
+
+        .simulation-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
     <script>
         // MathJax 配置
         window.MathJax = {
@@ -627,7 +636,6 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
 
-    <!-- Marked.js Markdown 渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
@@ -737,6 +745,7 @@
             }
             return cookieValue;
         }
+
         const csrftoken = getCookie('csrftoken');
 
         // 自動調整 textarea 高度
@@ -832,6 +841,14 @@
                     }
                     // ============================================
 
+                    // ====== [新增] 檢查後端外部連結資料 ======
+                    let simulationHtml = null;
+                    if (data.simulation_url) {
+                        console.log("接收到外部連結:", data.simulation_url);
+                        simulationHtml = createSimulationCard(data.simulation_url);
+                    }
+                    // ============================================
+
                     // 判斷是否為練習題模式
                     if (data.exercise_question && data.exercise_answer) {
                         // 練習題模式：儲存題目和答案
@@ -842,19 +859,19 @@
                         addMessage('', 'ai', null, {
                             question: data.exercise_question,
                             answer: data.exercise_answer
-                        }, drawingHtml);
+                        }, drawingHtml, simulationHtml);
                     } else {
                         // 一般對話模式：清空練習題資料
                         currentExerciseQuestion = '';
                         currentExerciseAnswer = '';
 
                         // 顯示分段
-                        addMessage(data.answer, 'ai', data.segments, null, drawingHtml); // <--- 這裡加上 drawingHtml 參數
+                        addMessage(data.answer, 'ai', data.segments, null, drawingHtml, simulationHtml);
                     }
 
                     // 更新對話歷史
-                    conversationHistory.push({ role: 'user', content: message });
-                    conversationHistory.push({ role: 'assistant', content: data.answer });
+                    conversationHistory.push({role: 'user', content: message});
+                    conversationHistory.push({role: 'assistant', content: data.answer});
                     sessionStorage.setItem('chatHistory_{{ course.pk }}', JSON.stringify(conversationHistory));
 
                     // 啟用輸入
@@ -944,22 +961,23 @@
         }
 
         // 添加訊息到聊天視窗
-        function addMessage(text, sender, segments = null, exerciseData = null, drawingHtml = null) {
+        // [修改] 增加 simulationHtml 參數
+        function addMessage(text, sender, segments = null, exerciseData = null, drawingHtml = null, simulationHtml = null) {
             const messageWrapper = document.createElement('div');
 
             // 系統訊息使用特殊樣式
             if (sender === 'system') {
                 messageWrapper.className = 'message-wrapper ai-message';
                 messageWrapper.innerHTML = `
-                    <div class="message-avatar" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
-                        <i class="bi bi-info-circle"></i>
+                <div class="message-avatar" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                    <i class="bi bi-info-circle"></i>
+                </div>
+                <div class="message-content">
+                    <div class="message-bubble" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #3b82f6; color: #1e40af;">
+                        <div style="font-weight: 600;">${text}</div>
                     </div>
-                    <div class="message-content">
-                        <div class="message-bubble" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #3b82f6; color: #1e40af;">
-                            <div style="font-weight: 600;">${text}</div>
-                        </div>
-                    </div>
-                `;
+                </div>
+            `;
                 chatMessages.appendChild(messageWrapper);
                 scrollToBottom();
                 return;
@@ -986,28 +1004,28 @@
                 const renderedQuestion = renderMarkdown(exerciseData.question);
                 const renderedAnswer = renderMarkdown(exerciseData.answer);
                 contentHTML = `
-                    <div class="message-bubble ${bubbleClass}">
-                        <div class="exercise-question">
-                            <h6 style="color: #0d6efd; margin-bottom: 12px;">
-                                <i class="bi bi-pencil-square"></i> 練習題
+                <div class="message-bubble ${bubbleClass}">
+                    <div class="exercise-question">
+                        <h6 style="color: #0d6efd; margin-bottom: 12px;">
+                            <i class="bi bi-pencil-square"></i> 練習題
+                        </h6>
+                        <div class="markdown-content">${renderedQuestion}</div>
+                    </div>
+                    <div class="exercise-answer-section" style="margin-top: 16px;">
+                        <button class="btn btn-outline-primary btn-sm" id="${buttonId}"
+                                onclick="toggleAnswer('${answerId}', '${buttonId}')">
+                            <i class="bi bi-eye"></i> 顯示答案
+                        </button>
+                        <div class="exercise-answer" id="${answerId}"
+                                style="display: none; margin-top: 12px; padding: 12px; background: #f8f9fa; border-left: 3px solid #28a745; border-radius: 4px;">
+                            <h6 style="color: #28a745; margin-bottom: 8px;">
+                                <i class="bi bi-check-circle"></i> 答案
                             </h6>
-                            <div class="markdown-content">${renderedQuestion}</div>
-                        </div>
-                        <div class="exercise-answer-section" style="margin-top: 16px;">
-                            <button class="btn btn-outline-primary btn-sm" id="${buttonId}"
-                                    onclick="toggleAnswer('${answerId}', '${buttonId}')">
-                                <i class="bi bi-eye"></i> 顯示答案
-                            </button>
-                            <div class="exercise-answer" id="${answerId}"
-                                 style="display: none; margin-top: 12px; padding: 12px; background: #f8f9fa; border-left: 3px solid #28a745; border-radius: 4px;">
-                                <h6 style="color: #28a745; margin-bottom: 8px;">
-                                    <i class="bi bi-check-circle"></i> 答案
-                                </h6>
-                                <div class="markdown-content">${renderedAnswer}</div>
-                            </div>
+                            <div class="markdown-content">${renderedAnswer}</div>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
             }
             // 如果有分段，顯示可點擊的分段（一般對話模式）
             else if (sender === 'ai' && segments && segments.length > 0) {
@@ -1018,77 +1036,88 @@
                     // 渲染 Markdown
                     const renderedSegment = renderMarkdown(segment);
                     contentHTML += `
-                        <div class="segment-item"
-                             data-segment-index="${index}"
-                             data-segment-text="${segment.replace(/"/g, '&quot;')}"
-                             id="${segmentId}"
-                             style="padding: 10px; margin: 8px 0; border-left: 3px solid #0d6efd; background: rgba(13, 110, 253, 0.05); border-radius: 4px; cursor: pointer; transition: all 0.2s;"
-                             onmouseover="this.style.background='rgba(13, 110, 253, 0.1)'"
-                             onmouseout="this.style.background='rgba(13, 110, 253, 0.05)'">
-                            <div class="markdown-content">${renderedSegment}</div>
-                            <small class="text-muted" style="display: block; margin-top: 8px;">
-                                <i class="bi bi-hand-index"></i> 點擊這段文字可以深入了解
-                            </small>
-                        </div>
-                    `;
+                    <div class="segment-item"
+                            data-segment-index="${index}"
+                            data-segment-text="${segment.replace(/"/g, '&quot;')}"
+                            id="${segmentId}"
+                            style="padding: 10px; margin: 8px 0; border-left: 3px solid #0d6efd; background: rgba(13, 110, 253, 0.05); border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(13, 110, 253, 0.1)'"
+                            onmouseout="this.style.background='rgba(13, 110, 253, 0.05)'">
+                        <div class="markdown-content">${renderedSegment}</div>
+                        <small class="text-muted" style="display: block; margin-top: 8px;">
+                            <i class="bi bi-hand-index"></i> 點擊這段文字可以深入了解
+                        </small>
+                    </div>
+                `;
                 });
                 contentHTML += '</div>';
             } else {
                 // 一般訊息
                 const renderedText = sender === 'ai' ? renderMarkdown(text) : text;
                 contentHTML = `
-                    <div class="message-bubble ${bubbleClass}">
-                        <div class="markdown-content">${renderedText}</div>
-                    </div>
-                `;
+                <div class="message-bubble ${bubbleClass}">
+                    <div class="markdown-content">${renderedText}</div>
+                </div>
+            `;
             }
 
-            // ====== [新增] 如果有畫圖 HTML，將其附加在內容的最後面 ======
+            // ====== [新增] 畫圖與外部連結的渲染 ======
+
+            // 1. 畫圖區塊
             if (drawingHtml) {
-                // 我們將畫圖區塊包在一個獨立的 div 中，確保它在文字下方
                 contentHTML += `
-                    <div class="drawing-section mt-3">
-                        ${drawingHtml}
-                    </div>
-                `;
+                <div class="drawing-section mt-3">
+                    ${drawingHtml}
+                </div>
+            `;
             }
+
+            // 2. [新增] 外部連結區塊
+            if (simulationHtml) {
+                contentHTML += `
+                <div class="simulation-section">
+                    ${simulationHtml}
+                </div>
+            `;
+            }
+            // ======================================
 
             // 如果是 AI 回答，加入反饋按鈕
             let feedbackHTML = '';
             if (sender === 'ai') {
                 const messageId = `msg-${Date.now()}`;
                 feedbackHTML = `
-                    <div class="message-feedback" data-message-id="${messageId}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="feedback-buttons">
-                                <button class="btn btn-sm btn-outline-warning" onclick="retryWithLowerLevel('${messageId}')">
-                                    <i class="bi bi-lightbulb"></i> 我還是不懂
-                                </button>
-                                <button class="btn btn-sm btn-outline-success" onclick="markAsUnderstood('${messageId}')">
-                                    <i class="bi bi-hand-thumbs-up"></i> 我懂了
-                                </button>
-                            </div>
-                            <small class="level-indicator">
-                                <i class="bi bi-speedometer2"></i> ${LEVEL_DISPLAY_NAMES[currentResponseLevel]}
-                            </small>
+                <div class="message-feedback" data-message-id="${messageId}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="feedback-buttons">
+                            <button class="btn btn-sm btn-outline-warning" onclick="retryWithLowerLevel('${messageId}')">
+                                <i class="bi bi-lightbulb"></i> 我還是不懂
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="markAsUnderstood('${messageId}')">
+                                <i class="bi bi-hand-thumbs-up"></i> 我懂了
+                            </button>
                         </div>
+                        <small class="level-indicator">
+                            <i class="bi bi-speedometer2"></i> ${LEVEL_DISPLAY_NAMES[currentResponseLevel]}
+                        </small>
                     </div>
-                `;
+                </div>
+            `;
             }
 
             messageWrapper.innerHTML = `
-                <div class="message-avatar">
-                    <i class="bi ${avatarIcon}"></i>
+            <div class="message-avatar">
+                <i class="bi ${avatarIcon}"></i>
+            </div>
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-sender">${senderName}</span>
+                    <span class="message-time">${currentTime}</span>
                 </div>
-                <div class="message-content">
-                    <div class="message-header">
-                        <span class="message-sender">${senderName}</span>
-                        <span class="message-time">${currentTime}</span>
-                    </div>
-                    ${contentHTML}
-                    ${feedbackHTML}
-                </div>
-            `;
+                ${contentHTML}
+                ${feedbackHTML}
+            </div>
+        `;
 
             chatMessages.appendChild(messageWrapper);
 
@@ -1125,19 +1154,19 @@
             indicator.className = 'message-wrapper ai-message';
             indicator.id = 'typingIndicator';
             indicator.innerHTML = `
-            <div class="message-avatar">
-                <i class="bi bi-robot"></i>
-            </div>
-            <div class="message-content">
-                <div class="message-bubble ai">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
+        <div class="message-avatar">
+            <i class="bi bi-robot"></i>
+        </div>
+        <div class="message-content">
+            <div class="message-bubble ai">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
                 </div>
             </div>
-        `;
+        </div>
+    `;
             chatMessages.appendChild(indicator);
             scrollToBottom();
         }
@@ -1279,7 +1308,8 @@
                 });
             }
         });
-        // ---------------------- 新增畫圖功能開始 ----------------------
+
+        // ---------------------- 畫圖功能開始 ----------------------
 
         // 1. 產生畫圖播放器的 HTML 字串
         function createDrawingViewer(drawingId, totalSteps) {
@@ -1289,32 +1319,32 @@
             const firstStepUrl = `/courses/api/drawing/${drawingId}/1/`;
 
             return `
-                <div class="drawing-container mt-3 p-3 border rounded bg-light" id="${viewerId}" 
-                    data-id="${drawingId}" data-total="${totalSteps}" data-current="1">
-                    
-                    <h6 class="border-bottom pb-2 mb-3 text-primary">
-                        <i class="bi bi-brush"></i> 解題圖示步驟
-                    </h6>
-                    
-                    <div class="text-center bg-white p-2 mb-3 border rounded" 
-                        style="min-height: 300px; display:flex; align-items:center; justify-content:center;">
-                        <img src="${firstStepUrl}" class="img-fluid step-image" alt="Step 1" 
-                            style="max-height: 350px; object-fit: contain;">
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="changeStep('${viewerId}', -1)" disabled>
-                            <i class="bi bi-chevron-left"></i> 上一步
-                        </button>
-                        
-                        <span class="step-counter badge bg-primary fs-6">步驟 1 / ${totalSteps}</span>
-                        
-                        <button class="btn btn-sm btn-primary" onclick="changeStep('${viewerId}', 1)">
-                            下一步 <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
+            <div class="drawing-container mt-3 p-3 border rounded bg-light" id="${viewerId}"
+                data-id="${drawingId}" data-total="${totalSteps}" data-current="1">
+
+                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                    <i class="bi bi-brush"></i> 解題圖示步驟
+                </h6>
+
+                <div class="text-center bg-white p-2 mb-3 border rounded"
+                    style="min-height: 300px; display:flex; align-items:center; justify-content:center;">
+                    <img src="${firstStepUrl}" class="img-fluid step-image" alt="Step 1"
+                        style="max-height: 350px; object-fit: contain;">
                 </div>
-            `;
+
+                <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="changeStep('${viewerId}', -1)" disabled>
+                        <i class="bi bi-chevron-left"></i> 上一步
+                    </button>
+
+                    <span class="step-counter badge bg-primary fs-6">步驟 1 / ${totalSteps}</span>
+
+                    <button class="btn btn-sm btn-primary" onclick="changeStep('${viewerId}', 1)">
+                        下一步 <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        `;
         }
 
         // 2. 處理步驟切換 (由 onclick 觸發)
@@ -1367,6 +1397,38 @@
                 nextBtn.disabled = false;
             }
         }
-        // ---------------------- 新增畫圖功能結束 ----------------------
+
+        // ---------------------- 畫圖功能結束 ----------------------
+
+        // ---------------------- [新增] 外部連結功能開始 ----------------------
+
+        // 產生外部連結卡片的 HTML
+        function createSimulationCard(url) {
+            // 簡單的防呆，確保有 URL
+            if (!url) return '';
+
+            return `
+            <div class="simulation-container mt-3 p-3 border rounded">
+                <div class="d-flex align-items-start">
+                    <div class="me-3 text-info">
+                        <i class="bi bi-laptop fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="text-dark mb-1">
+                            <i class="bi bi-window-stack"></i> 互動式模擬實驗
+                        </h6>
+                        <p class="text-muted small mb-2">
+                            這裡有一個相關的網頁模擬，可以幫助你更直觀地理解這個概念。
+                        </p>
+                        <a href="${url}" target="_blank" class="btn btn-sm btn-info text-white">
+                            <i class="bi bi-box-arrow-up-right"></i> 前往體驗
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        // ---------------------- [新增] 外部連結功能結束 ----------------------
     </script>
-    {% endblock %}
+{% endblock %}

@@ -1,16 +1,18 @@
 """
-FastAPI 服務 - RAG 聊天機器人 (多學科支援版)
+FastAPI 服務 - RAG 聊天機器人 (多學科支援版 + 外部連結整合)
 用於學生問答系統的後端 API
 """
 
+import os
+import random
+import sys
+import time
+from typing import List, Optional, Dict, Any
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
-import os
-import sys
-import time
-from dotenv import load_dotenv
 
 # 設定路徑
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +28,8 @@ load_dotenv(env_path)
 # 導入 RAG 相關模組
 from chatbot.rag_pipeline.RAG_function import rag_process
 
+
+# ==================== Helper Functions ====================
 
 def get_drawing_info(retrieved_docs):
     import json
@@ -51,6 +55,81 @@ def get_drawing_info(retrieved_docs):
                         print(f"讀取 Layout JSON 失敗: {e}")
                         continue
     return None, 0
+
+
+def get_simulation_info(retrieved_docs):
+    """
+    從檢索到的文件中提取模擬網站 URL
+    支援: Dictionary 物件 或 JSON String
+    """
+    import json  # 確保有引入 json
+
+    for doc in retrieved_docs:
+        sim_data = None
+
+        # 1. 取得原始資料
+        if hasattr(doc, "metadata"):
+            sim_data = doc.metadata.get("simulation")
+        elif isinstance(doc, dict):
+            # 防呆: 如果 doc 本身就是 dict (非 Document 物件)
+            sim_data = doc.get("metadata", {}).get("simulation")
+
+        if not sim_data:
+            continue
+
+        # 2. 關鍵修正: 如果是字串，先轉成 Dict
+        if isinstance(sim_data, str):
+            try:
+                sim_data = json.loads(sim_data)
+            except Exception as e:
+                print(f"⚠️ Simulation JSON 解析失敗: {e}")
+                continue
+
+        # 3. 現在 sim_data 肯定是 Dict 了，放心取值
+        if isinstance(sim_data, dict):
+            url = sim_data.get("url")
+            if url:
+                print(f"🎯 [get_simulation_info] 成功提取 URL: {url}")
+                return url
+
+    return None
+
+
+def get_random_exercise(subject, course_filter=None):
+    """
+    從練習題庫中隨機抽取一題
+    """
+    # 1. 取得該科目的練習題 vectorstore
+    vs = vector_stores.get(subject, {}).get("exercise")
+    if not vs:
+        return []
+
+    # 2. 取得所有文件 (從 docstore)
+    # FAISS 的 docstore._dict 存有所有 Document 物件
+    all_docs = list(vs.docstore._dict.values())
+
+    candidates = []
+
+    # 3. 過濾單元 (如果有指定)
+    if course_filter:
+        print(f"🎲 [Random] 正在篩選單元: {course_filter}")
+        for doc in all_docs:
+            category = doc.metadata.get("category", "")
+            # 這裡做簡單的字串包含比對
+            if course_filter in category:
+                candidates.append(doc)
+    else:
+        # 沒指定單元就全梭了
+        candidates = all_docs
+
+    print(f"🎲 [Random] 候選題數: {len(candidates)}")
+
+    # 4. 隨機抽一題
+    if candidates:
+        selected = random.choice(candidates)
+        return [selected]  # 回傳 list 格式以配合原本流程
+
+    return []
 
 
 # ==================== Pydantic Models ====================
@@ -93,8 +172,13 @@ class ChatResponse(BaseModel):
     learner_style: str = Field(..., description="使用的學習風格")
     exercise_question: Optional[str] = Field(default=None)
     exercise_answer: Optional[str] = Field(default=None)
+
+    # 畫圖相關
     drawing_id: Optional[str] = Field(default=None)
     drawing_total_steps: int = Field(default=0)
+
+    # 新增: 外部連結相關
+    simulation_url: Optional[str] = Field(default=None, description="外部模擬網站 URL")
 
 
 class ClarifyRequest(BaseModel):
@@ -120,7 +204,7 @@ class HealthResponse(BaseModel):
 app = FastAPI(
     title="RAG 聊天機器人 API (多學科)",
     description="支援數學與自然科的問答系統",
-    version="2.0.0",
+    version="2.1.0",
 )
 
 app.add_middleware(
@@ -163,6 +247,7 @@ PATH_CONFIG = {
         ),
     },
 }
+
 
 # ==================== 啟動事件 ====================
 
@@ -271,7 +356,6 @@ async def chat(request: ChatRequest):
         teaching_db = (selected_vs["teaching"], [])
         exercise_db = (selected_vs["exercise"], [])
 
-        # 驗證參數
         if request.search_type == "teaching":
             top_n = 3
         elif request.search_type == "exercise":
@@ -291,8 +375,9 @@ async def chat(request: ChatRequest):
 
         retrieved_docs = retrieved.get(request.message, [])
 
-        # 圖片邏輯 (簡化版：只在 math 或 science 的特定情況下找)
+        # --- 整合額外資源 (畫圖 & 外部網站) ---
         drawing_id, total_steps = get_drawing_info(retrieved_docs)
+        simulation_url = get_simulation_info(retrieved_docs)  # <--- 新增此行
 
         # 4. 生成答案
         matched_context = "\n".join(
@@ -366,6 +451,7 @@ async def chat(request: ChatRequest):
             exercise_answer=exercise_answer,
             drawing_id=drawing_id,
             drawing_total_steps=total_steps,
+            simulation_url=simulation_url,  # <--- 新增此行
         )
 
     except Exception as e:
@@ -415,7 +501,37 @@ async def chat_with_history(request: ChatRequest):
             course_filter=request.course_title,
         )
         retrieved_docs = retrieved.get(request.message, [])
+
+        # ========== DEBUG 區塊 ==========
+        # print("\n" + "=" * 40)
+        # print(f"🧐 [DEBUG] 收到問題: {request.message}")
+        # print(f"⚙️ [DEBUG] 參數設定: Subject={current_subject}, SearchType={request.search_type}")
+        # print(f"🏷️ [DEBUG] 課程過濾: {request.course_title} (若非 None 則會進行過濾)")
+        # print(f"📊 [DEBUG] 檢索結果數量: {len(retrieved_docs)} 筆")
+        #
+        # if len(retrieved_docs) == 0:
+        #     print("⚠️ 警告：檢索結果為空！請檢查 Subject 或 Course Title 是否設限過嚴。")
+        # else:
+        #     for i, doc in enumerate(retrieved_docs):
+        #         meta = doc.metadata if hasattr(doc, "metadata") else {}
+        #         sim = meta.get("simulation")
+        #
+        #         print(f"--- 文件 {i + 1} ---")
+        #         print(f"   📂 Category: {meta.get('category', 'N/A')}")
+        #         if sim:
+        #             print(f"   ✅ 找到 Simulation (Type: {type(sim)})")
+        #             print(f"   👀內容: {sim}")
+        #         else:
+        #             print(f"   ❌ 無 Simulation")
+        #
+        # sim_url = get_simulation_info(retrieved_docs)
+        # print(f"🚀 [DEBUG] 最終提取的 URL: {sim_url}")
+        # print("=" * 40 + "\n")
+        # ===============================        # =========================================
+
+        # --- 整合額外資源 (畫圖 & 外部網站) ---
         drawing_id, total_steps = get_drawing_info(retrieved_docs)
+        simulation_url = get_simulation_info(retrieved_docs)  # <--- 新增此行
 
         # 3. 記憶處理
         matched_context = "\n".join([doc.page_content for doc in retrieved_docs])
@@ -482,6 +598,7 @@ async def chat_with_history(request: ChatRequest):
             exercise_answer=exercise_answer,
             drawing_id=drawing_id,
             drawing_total_steps=total_steps,
+            simulation_url=simulation_url,  # <--- 新增此行
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"處理請求錯誤: {str(e)}")

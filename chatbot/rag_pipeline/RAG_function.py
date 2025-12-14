@@ -1,23 +1,24 @@
+import gc
+import json
+import os
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+from dotenv import load_dotenv
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import numpy as np
-import os
-import gc
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
 from openai import OpenAI
-from dotenv import load_dotenv
-import torch.nn.functional as F
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # ==================Load Function=============
 from .data_loader import Data_loader
 from .keyword_match import Keyword_matching
 from .post_process import Post_process
 from .semantic_chunk import Chunking
-
 # import model
 from ..config import (
     embedding_model_name,
@@ -88,6 +89,7 @@ load_dotenv()
 key = os.getenv("OPENAI_API_KEY")
 if not key:
     print("錯誤：找不到 OPENAI_API_KEY。請檢查你的 .env 檔案。")
+    exit()
 
 client = OpenAI(api_key=key)
 
@@ -154,11 +156,11 @@ class rag_process:
             self.style_classifier = None
 
     def vectorize_workflow(
-        self,
-        teaching_path,
-        exercise_path,
-        save_path_teaching="faiss_index_teaching",
-        save_path_exercise="faiss_index_exercise",
+            self,
+            teaching_path,
+            exercise_path,
+            save_path_teaching="faiss_index_teaching",
+            save_path_exercise="faiss_index_exercise",
     ):
         # 強制垃圾回收，避免記憶體殘留
         gc.collect()
@@ -182,12 +184,21 @@ class rag_process:
             chunk_result = chunker.semantic_chunk(raw_dicts)
 
             for chunk in chunk_result:
+                metadata = {
+                    "category": str(chunk['category']),
+                    "id": str(chunk['id'])
+                }
+
+                # --- 修改點 1: Chunking 模式 ---
+                if 'simulation' in chunk and chunk['simulation']:
+                    # 將 Dict 轉為 JSON 字串，確保 FAISS 能正確儲存
+                    metadata['simulation'] = json.dumps(chunk['simulation'], ensure_ascii=False)
+                else:
+                    metadata['simulation'] = None  # 明確給予 None 或不存
+
                 new_doc = Document(
-                    page_content=chunk["text"],
-                    metadata={
-                        "category": str(chunk["category"]),
-                        "id": str(chunk["id"]),
-                    },
+                    page_content=chunk['text'],
+                    metadata=metadata
                 )
                 final_teaching_docs.append(new_doc)
         else:
@@ -197,20 +208,25 @@ class rag_process:
             raw_dicts = loader.get_page_content(teaching_data)
 
             for item in raw_dicts:
+                metadata = {
+                    "category": item.get("category", "Teaching_Material"),
+                    "id": item.get("id", ""),
+                }
+
+                # --- 修改點 2: 一般教學模式 ---
+                if "simulation" in item and item["simulation"]:
+                    metadata["simulation"] = json.dumps(item["simulation"], ensure_ascii=False)
+                else:
+                    metadata["simulation"] = None
+
                 new_doc = Document(
                     page_content=item["content"],
-                    metadata={
-                        "category": item.get("category", "Teaching_Material"),
-                        "id": item.get("id", ""),
-                    },
+                    metadata=metadata,
                 )
                 final_teaching_docs.append(new_doc)
 
         # 建立或載入 FAISS (教學)
-        # 注意：這裡統一使用「建立」邏輯，因為 build_faiss.py 已經負責清理舊檔了
-        # 且為了確保模型一致性，建議重建
         print(f"  建立新教學向量庫 ({save_path_teaching})...")
-        # 傳入 self.embeddings (重複使用模型)
         teaching_vectorstore = self.vectorize_processor.vector_store(
             final_teaching_docs, self.embeddings, save_path=save_path_teaching
         )
@@ -228,19 +244,28 @@ class rag_process:
         final_exercise_docs = []
 
         for item in raw_ex_dicts:
+            # 1. 先定義基本 metadata
+            metadata = {
+                "category": item.get("category", "Exercise"),
+                "id": item.get("id", ""),
+                "question": item.get("question", ""),
+                "answer": item.get("answer", ""),
+            }
+
+            # --- 修改點 3: 練習題模式 (最關鍵的部分) ---
+            if "simulation" in item and item["simulation"]:
+                # 強制轉成 JSON String
+                metadata["simulation"] = json.dumps(item["simulation"], ensure_ascii=False)
+            else:
+                metadata["simulation"] = None
+
             new_doc = Document(
                 page_content=item["content"],
-                metadata={
-                    "category": item.get("category", "Exercise"),
-                    "id": item.get("id", ""),
-                    "question": item.get("question", ""),
-                    "answer": item.get("answer", ""),
-                },
+                metadata=metadata,
             )
             final_exercise_docs.append(new_doc)
 
         print(f"  建立新練習題向量庫 ({save_path_exercise})...")
-        # 傳入 self.embeddings (重複使用模型)
         exercise_vectorstore = self.vectorize_processor.vector_store(
             final_exercise_docs, self.embeddings, save_path=save_path_exercise
         )
@@ -253,13 +278,13 @@ class rag_process:
         )
 
     def retrival_step(
-        self,
-        queries: list[str],
-        search_type: str,
-        teaching_db,
-        exercise_db,
-        top_n,
-        course_filter=None,
+            self,
+            queries: list[str],
+            search_type: str,
+            teaching_db,
+            exercise_db,
+            top_n,
+            course_filter=None,
     ):
         """
         檢索步驟，支援根據課程過濾結果
@@ -362,6 +387,26 @@ class rag_process:
                 matched_chunks = filtered_chunks
 
             reranked_chunks = self.rerank(q, matched_chunks, top_k=top_n)
+
+            for doc in reranked_chunks:
+                # 情況 A: doc 是 LangChain 的 Document 物件
+                if hasattr(doc, "metadata"):
+                    sim = doc.metadata.get("simulation")
+                    if isinstance(sim, str):  # 只有當它是字串時才解析
+                        try:
+                            doc.metadata["simulation"] = json.loads(sim)
+                        except Exception:
+                            doc.metadata["simulation"] = None
+
+                # 情況 B: doc 是純 Dictionary (視你的 keyword_match 實作而定)
+                elif isinstance(doc, dict) and "metadata" in doc:
+                    sim = doc["metadata"].get("simulation")
+                    if isinstance(sim, str):
+                        try:
+                            doc["metadata"]["simulation"] = json.loads(sim)
+                        except Exception:
+                            doc["metadata"]["simulation"] = None
+
             results[q] = reranked_chunks
 
         return results
@@ -414,16 +459,16 @@ class rag_process:
         return top_reranked_chunks
 
     def generate_answer(
-        self,
-        context,
-        query,
-        learner_style,
-        memory_chunk,
-        subject="math",
-        is_exercise_mode=False,
-        course_title=None,
-        use_alternative=False,
-        retry_count=0,
+            self,
+            context,
+            query,
+            learner_style,
+            memory_chunk,
+            subject="math",
+            is_exercise_mode=False,
+            course_title=None,
+            use_alternative=False,
+            retry_count=0,
     ):
         temperature = 0.8 if (use_alternative or retry_count > 0) else 0.7
 
@@ -555,11 +600,11 @@ class rag_process:
         return str(answer).strip()
 
     def generate_clarification(
-        self,
-        selected_text: str,
-        original_query: str,
-        original_docs: list,
-        learner_style: str,
+            self,
+            selected_text: str,
+            original_query: str,
+            original_docs: list,
+            learner_style: str,
     ):
         llm = ChatOpenAI(
             model=gpt_model,
@@ -639,7 +684,7 @@ class rag_process:
         return str(clarification).strip()
 
     def clarification_main_process(
-        self, segments, user_query, retrieved_docs, learner_style
+            self, segments, user_query, retrieved_docs, learner_style
     ):
         if segments and len(segments) > 1:
             print(f"\n{'-' * 30}")

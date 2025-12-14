@@ -1,7 +1,8 @@
-from .rag_pipeline.RAG_function import rag_process
-from .rag_pipeline.post_process import Post_process
 import os
 import sys
+
+from .rag_pipeline.RAG_function import rag_process
+from .rag_pipeline.post_process import Post_process
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -193,6 +194,30 @@ class Rag_Main:
                     print(f"開啟繪圖視窗失敗: {e}")
             else:
                 pass
+
+    def search_url(self, docs):
+        """
+        得到題目中的對應url
+        """
+        sim = docs.metadata.get("simulation")
+        if sim is not None:
+            return sim.get("url")
+
+    def show_outside_packages(self, subject, docs):
+        """
+        工具分派器
+        根據科目決定要顯示「解題步驟圖」還是「模擬實驗網頁」。
+        """
+        if subject == 'math':
+            self.check_and_show_drawing(docs)
+        elif subject == 'science':
+            if isinstance(docs, list):
+                first_doc = docs[0]
+            else:
+                first_doc = docs
+            url = self.search_url(first_doc)
+            if url:
+                self.simulator.show(url)
 
 
 if __name__ == "__main__":
