@@ -221,15 +221,21 @@ class Rag_Main:
 
 
 if __name__ == "__main__":
-    # 教學資料
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    print(f"目前專案基準路徑: {base_dir}")
+
     teaching_path_list = [
-        r"D:\rag_pack\rag_pack\dataset\handouts_data\三角形全等應用.pdf",
-        r"D:\rag_pack\rag_pack\dataset\handouts_data\函數.pdf",
+        os.path.join(base_dir, "dataset", "handouts_data", "三角形全等應用.pdf"),
+        os.path.join(base_dir, "dataset", "handouts_data", "函數.pdf"),
     ]
-    # 練習題/QA資料
-    exercise_path = (
-        r"D:\rag_pack\rag_pack\dataset\raw_data\add_id_data\question_math_id.json"
+
+    exercise_path = os.path.join(
+        base_dir, "dataset", "raw_data", "add_id_data", "question_math_id.json"
     )
+
+    for path in teaching_path_list:
+        if not os.path.exists(path):
+            print(f"警告：找不到檔案 -> {path}")
 
     rag_main = Rag_Main()
 

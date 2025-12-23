@@ -481,60 +481,58 @@ async def chat_with_history(request: ChatRequest):
                     status_code=400, detail=f"科目 {current_subject} 的資料庫未載入"
                 )
 
-        teaching_db = (selected_vs["teaching"], [])
-        exercise_db = (selected_vs["exercise"], [])
+        # === 修正點 1: 預先初始化變數，避免 UnboundLocalError ===
+        retrieved_docs = []
+        processing_message = request.message  # 預設使用用戶原始訊息
 
-        if request.search_type == "teaching":
-            top_n = 3
-        elif request.search_type == "exercise":
-            top_n = 1
+        # 2. 判斷模式並獲取文件
+        if request.search_type == "random_exercise":
+            print(f"🎲 [Mode] 啟動隨機出題模式 Subject: {current_subject}")
+
+            # 隨機取題
+            retrieved_docs = get_random_exercise(current_subject, request.course_title)
+
+            if not retrieved_docs:
+                print("⚠️ [Random] 無法隨機抽取題目 (可能該單元無題目)")
+                # 抽不到題目的 fallback：維持原訊息，讓 AI 自由發揮或道歉
+            else:
+                print(f"🎲 [Random] 隨機抽中題目 ID: {retrieved_docs[0].metadata.get('id', 'unknown')}")
+                # === 修正點 2: 在隨機模式下，修改傳給 AI 的指令 ===
+                processing_message = "請將我提供的題目資料整理成標準練習題格式，包含【題目】與【答案】。"
+
         else:
-            top_n = 4
+            # 一般檢索模式 (Teaching / Exercise / Hybrid)
+            teaching_db = (selected_vs["teaching"], [])
+            exercise_db = (selected_vs["exercise"], [])
 
-        # 2. 檢索
-        retrieved = rag_service.retrival_step(
-            [request.message],
-            request.search_type,
-            teaching_db,
-            exercise_db,
-            top_n=top_n,
-            course_filter=request.course_title,
-        )
-        retrieved_docs = retrieved.get(request.message, [])
+            if request.search_type == "teaching":
+                top_n = 3
+            elif request.search_type == "exercise":
+                top_n = 1
+            else:
+                top_n = 4
 
-        # ========== DEBUG 區塊 ==========
-        # print("\n" + "=" * 40)
-        # print(f"🧐 [DEBUG] 收到問題: {request.message}")
-        # print(f"⚙️ [DEBUG] 參數設定: Subject={current_subject}, SearchType={request.search_type}")
-        # print(f"🏷️ [DEBUG] 課程過濾: {request.course_title} (若非 None 則會進行過濾)")
-        # print(f"📊 [DEBUG] 檢索結果數量: {len(retrieved_docs)} 筆")
-        #
-        # if len(retrieved_docs) == 0:
-        #     print("⚠️ 警告：檢索結果為空！請檢查 Subject 或 Course Title 是否設限過嚴。")
-        # else:
-        #     for i, doc in enumerate(retrieved_docs):
-        #         meta = doc.metadata if hasattr(doc, "metadata") else {}
-        #         sim = meta.get("simulation")
-        #
-        #         print(f"--- 文件 {i + 1} ---")
-        #         print(f"   📂 Category: {meta.get('category', 'N/A')}")
-        #         if sim:
-        #             print(f"   ✅ 找到 Simulation (Type: {type(sim)})")
-        #             print(f"   👀內容: {sim}")
-        #         else:
-        #             print(f"   ❌ 無 Simulation")
-        #
-        # sim_url = get_simulation_info(retrieved_docs)
-        # print(f"🚀 [DEBUG] 最終提取的 URL: {sim_url}")
-        # print("=" * 40 + "\n")
-        # ===============================        # =========================================
+            # 執行檢索
+            retrieved = rag_service.retrival_step(
+                [request.message],
+                request.search_type,
+                teaching_db,
+                exercise_db,
+                top_n=top_n,
+                course_filter=request.course_title,
+            )
+            retrieved_docs = retrieved.get(request.message, [])
 
         # --- 整合額外資源 (畫圖 & 外部網站) ---
         drawing_id, total_steps = get_drawing_info(retrieved_docs)
-        simulation_url = get_simulation_info(retrieved_docs)  # <--- 新增此行
+        simulation_url = get_simulation_info(retrieved_docs)
 
         # 3. 記憶處理
-        matched_context = "\n".join([doc.page_content for doc in retrieved_docs])
+        matched_context = "\n".join([
+            doc.page_content if hasattr(doc, "page_content") else str(doc)
+            for doc in retrieved_docs
+        ])
+
         memory_chunk = ""
         if request.history:
             recent_history = request.history[-10:]
@@ -545,13 +543,15 @@ async def chat_with_history(request: ChatRequest):
             memory_chunk = "\n".join(memory_lines)
 
         # 4. 生成
-        is_exercise_mode = request.search_type == "exercise"
+        # === 修正點 3: 確保隨機模式也被視為練習題模式 ===
+        is_exercise_mode = request.search_type in ["exercise", "random_exercise"]
+
         answer = rag_service.generate_answer(
             matched_context,
-            request.message,
+            processing_message,  # 這裡傳入 processing_message 給 query 參數，這是正確的
             request.learner_style,
             memory_chunk,
-            subject=current_subject,  # 傳入科目
+            subject=current_subject,
             is_exercise_mode=is_exercise_mode,
             course_title=request.course_title,
             use_alternative=request.use_alternative,
@@ -562,9 +562,9 @@ async def chat_with_history(request: ChatRequest):
         exercise_question = None
         exercise_answer = None
         segments = []
+
         if is_exercise_mode:
             import re
-
             question_match = re.search(
                 r"【題目】\s*(.*?)\s*【答案】", answer, re.DOTALL
             )
@@ -577,7 +577,6 @@ async def chat_with_history(request: ChatRequest):
                 exercise_answer = "（AI 未提供標準答案格式）"
         else:
             from chatbot.rag_pipeline.post_process import Post_process
-
             post_processor = Post_process()
             segments = post_processor.split_answer(answer)
 
@@ -598,9 +597,13 @@ async def chat_with_history(request: ChatRequest):
             exercise_answer=exercise_answer,
             drawing_id=drawing_id,
             drawing_total_steps=total_steps,
-            simulation_url=simulation_url,  # <--- 新增此行
+            simulation_url=simulation_url,
         )
+
     except Exception as e:
+        # 這裡會印出詳細的錯誤訊息到終端機，方便除錯
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"處理請求錯誤: {str(e)}")
 
 

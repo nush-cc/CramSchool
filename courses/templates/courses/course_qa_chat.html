@@ -67,25 +67,8 @@
                     </div>
                     <div class="card-body p-2">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
-                                    data-question="請給我一個基礎題目來練習"
-                                    data-search-type="exercise">
-                                <i class="bi bi-1-circle"></i> 基礎題目
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
-                                    data-question="請給我一個進階題目來挑戰"
-                                    data-search-type="exercise">
-                                <i class="bi bi-2-circle"></i> 進階題目
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
-                                    data-question="請給我一個應用題來練習"
-                                    data-search-type="exercise">
-                                <i class="bi bi-3-circle"></i> 應用題目
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary quick-question-btn"
-                                    data-question="請給我一個綜合題目"
-                                    data-search-type="exercise">
-                                <i class="bi bi-star"></i> 綜合題目
+                            <button class="btn btn-primary random-question-btn btn-random" id="btnRandomQuestion">
+                                <i class="bi bi-shuffle"></i> 隨機出題練習
                             </button>
                         </div>
                     </div>
@@ -308,6 +291,21 @@
 
         .btn-outline-danger:hover {
             box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        /* 自定義紫色按鈕樣式 */
+        .btn-random {
+            background: linear-gradient(135deg, #99aeff 0%, #b088e6 100%);
+            border: none;
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-random:hover {
+            background: linear-gradient(135deg, #8299ff 0%, #9e72d9 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(158, 114, 217, 0.3); /* 陰影也改淡 */
+            transform: translateY(-2px); /* 輕微浮起效果 */
         }
 
         /* 等級徽章樣式 */
@@ -784,6 +782,19 @@
                 sendMessage(question, searchType);
             });
         });
+
+        const btnRandomQuestion = document.getElementById('btnRandomQuestion');
+
+        if (btnRandomQuestion) {
+            btnRandomQuestion.addEventListener('click', function () {
+                // 這裡的 message 文字對於後端檢索不再重要，因為我們會隨機抽
+                // 但對於顯示在聊天視窗上給使用者看是需要的
+                const displayMessage = "請給我一題隨機練習題來練習";
+
+                // 重點：傳入 'random_exercise' 作為 searchType
+                sendMessage(displayMessage, 'random_exercise');
+            });
+        }
 
         // 發送訊息函數（呼叫真實 API）
         function sendMessage(message, searchType = 'hybrid', isRetry = false, useAlternative = false, retryCountParam = 0) {

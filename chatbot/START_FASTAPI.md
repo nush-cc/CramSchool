@@ -12,6 +12,7 @@ pip install -r chatbot/requirements_fastapi.txt
 ### 2. 檢查必要檔案
 
 確認以下檔案存在：
+
 - ✅ `.env` - 包含 OPENAI_API_KEY
 - ✅ `chatbot/dataset/handouts_data/*.pdf` - 教學資料
 - ✅ `chatbot/dataset/raw_data/add_id_data/question_math_id.json` - 練習題
@@ -27,7 +28,7 @@ pip install -r chatbot/requirements_fastapi.txt
 ```bash
 # 在專案根目錄（D:\NCKU\cram）
 cd D:\NCKU\cram
-uvicorn chatbot.fastapi_app:app --host 0.0.0.0 --port 8001 --reload
+uvicorn chatbot.fastapi_app:app --host 0.0.0.0 --port 8001
 ```
 
 ### 方法 2: 直接執行 Python
@@ -76,11 +77,13 @@ python fastapi_app.py
 ### 1. 健康檢查
 
 在瀏覽器開啟：
+
 ```
 http://localhost:8001/health
 ```
 
 應該看到：
+
 ```json
 {
   "status": "ok",
@@ -92,6 +95,7 @@ http://localhost:8001/health
 ### 2. 查看 API 文件（Swagger UI）
 
 在瀏覽器開啟：
+
 ```
 http://localhost:8001/docs
 ```
@@ -143,10 +147,13 @@ curl -X POST "http://localhost:8001/chat" \
 ## 📡 API 端點說明
 
 ### `GET /health`
+
 健康檢查，確認服務是否正常
 
 ### `POST /chat`
+
 基本問答（無記憶）
+
 - **request body:**
   ```json
   {
@@ -158,7 +165,9 @@ curl -X POST "http://localhost:8001/chat" \
   ```
 
 ### `POST /chat_with_history`
+
 帶記憶的問答
+
 - **request body:**
   ```json
   {
@@ -177,6 +186,7 @@ curl -X POST "http://localhost:8001/chat" \
 ## 🐛 常見問題
 
 ### 問題 1: ModuleNotFoundError
+
 ```
 解決方法：確保在專案根目錄（D:\NCKU\cram）執行指令
 cd D:\NCKU\cram
@@ -184,12 +194,14 @@ uvicorn chatbot.fastapi_app:app --port 8001
 ```
 
 ### 問題 2: CUDA out of memory
+
 ```
 解決方法：修改 config.py
 model_device = "cpu"  # 改用 CPU
 ```
 
 ### 問題 3: 找不到 OPENAI_API_KEY
+
 ```
 解決方法：檢查 D:\NCKU\cram\.env 檔案
 確保有這一行：
@@ -197,6 +209,7 @@ OPENAI_API_KEY=sk-proj-...
 ```
 
 ### 問題 4: 向量資料庫載入失敗
+
 ```
 解決方法：重新建立向量資料庫
 1. 刪除 faiss_index_teaching 和 faiss_index_exercise 資料夾
@@ -220,14 +233,17 @@ uvicorn chatbot.fastapi_app:app --port 8001 --reload
 ## 📊 效能監控
 
 查看處理時間：
+
 ```json
 {
   "answer": "...",
-  "processing_time": 2.35  // 秒
+  "processing_time": 2.35
+  // 秒
 }
 ```
 
 一般來說：
+
 - **檢索**: 0.5-1 秒
 - **LLM 生成**: 1-3 秒
 - **總計**: 2-5 秒
@@ -237,12 +253,14 @@ uvicorn chatbot.fastapi_app:app --port 8001 --reload
 ## 🎯 下一步
 
 ✅ **Phase 1 完成** - FastAPI 基本功能
+
 - [x] 基本問答 endpoint
 - [x] 帶記憶的問答 endpoint
 - [x] 三種檢索模式
 - [x] 三種學習風格
 
 🔜 **Phase 2** - 整合到 Django
+
 - [ ] Django view 呼叫 FastAPI
 - [ ] 前端 JavaScript 修改
 - [ ] 對話歷史記錄到資料庫
@@ -253,6 +271,7 @@ uvicorn chatbot.fastapi_app:app --port 8001 --reload
 ## 📞 測試完成後
 
 如果測試成功，你應該能：
+
 1. ✅ 在瀏覽器看到 Swagger UI
 2. ✅ 健康檢查返回正常
 3. ✅ 使用 Swagger UI 測試聊天功能
